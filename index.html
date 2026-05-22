@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#010610">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>SHADOW DASH ULTRA</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+html,body{touch-action:manipulation;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--n:#00f5ff;--a:#ff2d78;--g:#ffd700;--p:#b44fff;--gr:#00ff88;--o:#ff8c00;--gl:rgba(255,255,255,.04);--gln:rgba(255,255,255,.08);}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+body{display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;user-select:none;}
+#app{position:relative;width:480px;height:820px;overflow:hidden;border:1px solid rgba(0,245,255,.3);
+  box-shadow:0 0 120px rgba(0,245,255,.18),0 0 280px rgba(0,0,80,.9),inset 0 0 120px rgba(0,0,0,.95);transform-origin:top center;}
+canvas{position:absolute;inset:0;width:100%;height:100%;}
+#gc{z-index:2;}#bg{z-index:1;}
+#app::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:90;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.028) 3px,rgba(0,0,0,.028) 6px);}
+/* SCREENS */
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  z-index:10;transition:opacity .32s,transform .32s;background:transparent;}
+.scr.hide{display:none!important;}
+.si{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
+  width:100%;height:100%;overflow-y:auto;padding:22px 18px 80px;
+  scrollbar-width:thin;scrollbar-color:rgba(0,245,255,.3) transparent;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
+.si::-webkit-scrollbar{width:3px;}
+.si::-webkit-scrollbar-thumb{background:rgba(0,245,255,.3);border-radius:2px;}
+/* LOGO */
+.logo{font-family:'Bebas Neue',cursive;font-size:80px;line-height:.88;letter-spacing:6px;text-align:center;
+  background:linear-gradient(155deg,#fff 0%,#00f5ff 45%,#ff2d78 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(0,245,255,.45));}
+.logo-tag{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:7px;color:rgba(0,245,255,.4);margin:3px 0 2px;}
+.logo-ver{font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:5px;color:var(--g);text-shadow:0 0 18px var(--g);}
+/* BUTTONS */
+.btn{font-family:'Bebas Neue',cursive;letter-spacing:4px;cursor:pointer;border:none;outline:none;
+  position:relative;overflow:hidden;transition:all .18s;}
+.bp{background:transparent;border:2px solid var(--n);color:var(--n);font-size:22px;
+  padding:15px 62px;overflow:hidden;}
+.bp::before{content:'';position:absolute;inset:0;background:var(--n);transform:translateX(-105%);transition:transform .2s;}
+.bp:hover::before,.bp:active::before{transform:none;}
+.bp:hover,.bp:active{color:#000;}
+.bp.gold{border-color:var(--g);color:var(--g);}.bp.gold::before{background:var(--g);}
+.bp.red{border-color:var(--a);color:var(--a);}.bp.red::before{background:var(--a);}
+.bp.pur{border-color:var(--p);color:var(--p);}.bp.pur::before{background:var(--p);}
+.bp.grn{border-color:var(--gr);color:var(--gr);}.bp.grn::before{background:var(--gr);}
+.bp.sm{font-size:14px;padding:9px 26px;}
+.bp.xs{font-size:11px;padding:6px 16px;}
+/* NAV GRID */
+.ngrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;margin:10px 0;}
+.nb{background:var(--gl);border:1px solid var(--gln);color:rgba(255,255,255,.6);
+  font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:2px;padding:13px 4px 9px;
+  cursor:pointer;transition:all .2s;text-align:center;border-radius:6px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;}
+.nb .ni{font-size:22px;line-height:1;}
+.nb:hover,.nb:active{border-color:var(--n);color:var(--n);background:rgba(0,245,255,.07);transform:translateY(-2px);}
+.nb.rn:active{background:rgba(255,45,120,.2) !important;transform:scale(.97) !important;}
+.nb.rn:hover{border-color:var(--a);color:var(--a);background:rgba(255,45,120,.07);}
+/* COIN BAR */
+.cbar{display:flex;align-items:center;gap:7px;background:rgba(255,215,0,.07);
+  border:1px solid rgba(255,215,0,.28);border-radius:24px;padding:5px 14px;margin:5px 0;}
+.cdot{width:13px;height:13px;background:var(--g);border-radius:50%;box-shadow:0 0 9px var(--g);}
+.cnum{font-family:'Bebas Neue',cursive;font-size:19px;color:var(--g);letter-spacing:2px;}
+/* HUD */
+#hud{position:absolute;inset:0;pointer-events:none;z-index:15;display:none;}
+#hs-wrap{position:absolute;top:11px;left:14px;}
+#hb-wrap{position:absolute;top:11px;right:14px;text-align:right;}
+#hc-wrap{position:absolute;top:11px;left:50%;transform:translateX(-50%);}
+.hv{font-family:'Bebas Neue',cursive;font-size:38px;color:#fff;text-shadow:0 0 18px var(--n);line-height:1;}
+.hl{font-size:8px;letter-spacing:3px;color:rgba(255,255,255,.3);text-transform:uppercase;}
+#hb-wrap .hv{font-size:21px;color:var(--g);text-shadow:0 0 11px var(--g);}
+#hc-wrap .hv{font-size:19px;color:var(--g);}
+#combo-hud{position:absolute;top:66px;right:13px;font-family:'Bebas Neue',cursive;font-size:20px;color:var(--a);text-shadow:0 0 13px var(--a);transition:opacity .25s;opacity:0;}
+
+#pubar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;}
+.pu{width:40px;height:40px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:17px;border:2px solid rgba(255,255,255,.1);background:rgba(0,0,0,.6);opacity:.28;transition:all .25s;position:relative;overflow:hidden;}
+.pu.on{opacity:1;border-color:var(--g);box-shadow:0 0 14px rgba(255,215,0,.35);}
+.pu .pt{position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--g);transform-origin:left;border-radius:0 0 6px 6px;}
+#boss-wrap{position:absolute;top:60px;left:14px;right:14px;display:none;}
+#boss-lbl{font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:4px;color:#ff2020;margin-bottom:3px;animation:fl .4s infinite alternate;}
+@keyframes fl{from{opacity:1}to{opacity:.5}}
+#boss-track{height:6px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;}
+#boss-fill{height:100%;background:linear-gradient(90deg,#ff2020,#ff8c00);border-radius:4px;transition:width .08s;}
+
+/* SHOP / PANELS */
+.ptitle{font-family:'Bebas Neue',cursive;font-size:42px;letter-spacing:5px;color:var(--g);text-shadow:0 0 24px var(--g);margin-bottom:4px;}
+.tabrow{display:flex;gap:5px;margin:6px 0 10px;flex-wrap:wrap;justify-content:center;}
+.tab{font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:3px;padding:6px 13px;
+  border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.3);cursor:pointer;border-radius:3px;transition:all .2s;}
+.tab.on{border-color:var(--n);color:var(--n);background:rgba(0,245,255,.07);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;width:100%;}
+.card{background:var(--gl);border:1px solid var(--gln);border-radius:10px;padding:13px 9px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .22s;position:relative;}
+.card:hover,.card:active{border-color:rgba(0,245,255,.35);background:rgba(0,245,255,.07);transform:translateY(-2px);}
+.card.owned{border-color:var(--gr);}
+.card.equipped{border-color:var(--g)!important;}
+.cico{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:2px;}
+.cname{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:#fff;}
+.cdesc{font-size:9px;color:rgba(255,255,255,.32);text-align:center;line-height:1.4;}
+.cprice{font-family:'Bebas Neue',cursive;font-size:15px;color:var(--g);letter-spacing:2px;}
+.badge{position:absolute;top:5px;right:5px;font-size:7px;letter-spacing:1px;padding:2px 5px;border-radius:3px;font-weight:700;}
+.beq{background:var(--g);color:#000;left:5px;right:auto;}
+/* LB */
+.lb-head{width:100%;display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr;gap:0;
+  padding:10px 14px;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.15);border-radius:8px;margin-bottom:10px;}
+.lb-stat{text-align:center;}
+.lb-sv{font-family:'Bebas Neue',cursive;font-size:30px;color:var(--g);}
+.lb-sl{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.28);}
+.lb-div{background:rgba(255,255,255,.1);}
+.lbrow{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;margin-bottom:6px;
+  border:1px solid transparent;transition:all .2s;position:relative;overflow:hidden;}
+.lbrow::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.04),transparent);pointer-events:none;}
+.lbrow.lbg{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.28);}
+.lbrow.lbs{background:rgba(180,180,200,.05);border-color:rgba(180,180,200,.18);}
+.lbrow.lbb{background:rgba(205,127,50,.05);border-color:rgba(205,127,50,.18);}
+.lbrow.lbm{background:rgba(0,245,255,.05);border-color:rgba(0,245,255,.28);box-shadow:0 0 18px rgba(0,245,255,.08);}
+.lbrow.lbn{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.05);}
+.lb-rn{font-family:'Bebas Neue',cursive;font-size:20px;width:30px;text-align:center;color:rgba(255,255,255,.3);}
+.lb-rn.gc{color:var(--g);text-shadow:0 0 10px var(--g);}
+.lb-rn.sc{color:#ccc;}.lb-rn.bc{color:#cd7f32;}
+.lb-av{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.lb-info{flex:1;min-width:0;}
+.lb-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-sub{font-size:9px;color:rgba(255,255,255,.28);letter-spacing:1px;}
+
+
+.lb-sc{text-align:right;flex-shrink:0;}
+.lb-scn{font-family:'Bebas Neue',cursive;font-size:20px;color:var(--g);letter-spacing:2px;}
+/* LOG */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;width:100%;margin-bottom:12px;}
+.sc{background:var(--gl);border:1px solid var(--gln);border-radius:8px;padding:11px;text-align:center;}
+.sv{font-family:'Bebas Neue',cursive;font-size:24px;color:var(--n);}
+.sl{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.28);}
+.rune{background:var(--gl);border:1px solid var(--gln);border-radius:8px;padding:11px 13px;margin-bottom:6px;display:flex;align-items:center;gap:11px;width:100%;}
+.rune:hover{border-color:rgba(0,245,255,.22);}
+.runnum{font-family:'Bebas Neue',cursive;font-size:26px;color:rgba(255,255,255,.18);width:34px;text-align:center;}
+.rund{flex:1;}
+.runsc{font-family:'Bebas Neue',cursive;font-size:20px;color:#fff;}
+.runm{font-size:9px;color:rgba(255,255,255,.28);letter-spacing:1px;}
+/* MISSIONS */
+.mcard{background:var(--gl);border:1px solid rgba(180,79,255,.16);border-radius:9px;padding:13px;display:flex;align-items:center;gap:11px;margin-bottom:7px;width:100%;}
+.mcard.done{border-color:rgba(255,215,0,.3);}
+.mcard.claimed{opacity:.4;}
+.mico{font-size:26px;width:38px;text-align:center;flex-shrink:0;}
+.mbody{flex:1;}
+.mname{font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:#fff;}
+.mdesc{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px;}
+.mbar{height:3px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:6px;overflow:hidden;}
+.mfill{height:100%;background:linear-gradient(90deg,var(--p),var(--a));border-radius:2px;transition:width .4s;}
+.mcard.done .mfill{background:linear-gradient(90deg,var(--g),var(--gr));}
+.clbtn{font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:2px;padding:6px 11px;border-radius:4px;cursor:pointer;border:none;background:var(--g);color:#000;transition:all .15s;}
+.mrew{font-family:'Bebas Neue',cursive;font-size:13px;color:rgba(255,215,0,.45);letter-spacing:2px;}
+/* ACHIEVEMENTS */
+.acard{background:var(--gl);border:1px solid rgba(255,215,0,.1);border-radius:9px;padding:11px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.acard.u{border-color:rgba(255,215,0,.38);background:rgba(255,215,0,.055);}
+.acard.lk{opacity:.32;filter:grayscale(.8);}
+.aico{font-size:26px;}.aname{font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:2px;color:#fff;text-align:center;}
+.adesc{font-size:8px;color:rgba(255,255,255,.28);text-align:center;}
+/* SETTINGS */
+.srow{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;
+  background:var(--gl);border:1px solid var(--gln);border-radius:7px;margin-bottom:7px;width:100%;}
+.slbl{font-size:13px;letter-spacing:1px;color:rgba(255,255,255,.5);}
+.toggle{width:42px;height:22px;border-radius:11px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.15);cursor:pointer;position:relative;transition:all .2s;}
+.toggle.on{background:var(--n);border-color:var(--n);box-shadow:0 0 10px rgba(0,245,255,.35);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;}
+.toggle.on::after{transform:translateX(20px);}
+/* GAME OVER */
+.gowrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;padding:28px 18px;}
+.gotag{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:6px;color:var(--a);margin-bottom:5px;}
+.goscore{font-family:'Bebas Neue',cursive;font-size:92px;color:#fff;line-height:1;text-shadow:0 0 55px rgba(255,45,120,.5);}
+.gobest{font-family:'Bebas Neue',cursive;font-size:20px;color:var(--g);letter-spacing:3px;}
+.gonew{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:5px;color:var(--gr);animation:gp 1s infinite;}
+@keyframes gp{0%,100%{opacity:1}50%{opacity:.4}}
+.godiv{width:230px;height:1px;margin:16px 0;background:linear-gradient(90deg,transparent,rgba(0,245,255,.28),transparent);}
+.gostats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;width:100%;margin-bottom:16px;}
+.gostat{background:var(--gl);border:1px solid var(--gln);border-radius:7px;padding:9px 5px;text-align:center;}
+.gosv{font-family:'Bebas Neue',cursive;font-size:20px;color:var(--n);}
+.gosl{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,.28);}
+.rvbox{background:rgba(255,215,0,.05);border:2px solid rgba(255,215,0,.28);border-radius:7px;padding:12px 18px;margin-bottom:11px;text-align:center;width:100%;}
+.rvbox p,.rvbox div{font-size:11px;color:rgba(255,255,255,.38);letter-spacing:1px;margin-bottom:8px;}
+/* TOAST */
+#toast{position:absolute;top:88px;left:50%;transform:translateX(-50%);font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:3px;
+  color:#000;background:var(--g);padding:9px 24px;border-radius:4px;z-index:200;opacity:0;transition:opacity .28s;pointer-events:none;white-space:nowrap;}
+/* HDivider */
+.hdiv{width:100%;height:1px;background:var(--gln);margin:10px 0;}
+
+/* ── V6 MODE CARDS ─────────────────────────────────── */
+.mode-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;cursor:pointer;transition:all .22s;margin-bottom:10px;width:100%;}
+.mode-card:hover,.mode-card:active{transform:translateY(-2px);}
+.mode-card.mc-endless:hover{border-color:rgba(0,245,255,.45);box-shadow:0 6px 24px rgba(0,245,255,.1);}
+.mode-card.mc-timeatk:hover{border-color:rgba(255,140,0,.45);box-shadow:0 6px 24px rgba(255,140,0,.1);}
+.mode-card.mc-bossrush:hover{border-color:rgba(255,45,120,.45);box-shadow:0 6px 24px rgba(255,45,120,.1);}
+.mc-row{display:flex;align-items:center;gap:14px;}
+.mc-ico{font-size:34px;width:48px;text-align:center;flex-shrink:0;}
+.mc-info{flex:1;}
+.mc-name{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:3px;}
+.mc-desc{font-size:11px;color:rgba(255,255,255,.38);letter-spacing:.5px;margin-top:2px;}
+.mc-best{font-family:'Bebas Neue',cursive;font-size:12px;color:rgba(255,215,0,.55);margin-top:4px;}
+.mc-badge{font-family:'Bebas Neue',cursive;font-size:10px;letter-spacing:2px;padding:3px 9px;border-radius:3px;flex-shrink:0;}
+/* ── V6 TIMER HUD ──────────────────────────────────── */
+#h-timer{position:absolute;top:10px;left:50%;transform:translateX(-50%);text-align:center;display:none;}
+#h-timer .hv{font-size:42px;color:#ff8c00;text-shadow:0 0 22px #ff8c00;}
+#h-timer.urg .hv{color:#ff2d78;text-shadow:0 0 22px #ff2d78;animation:tpu .5s infinite;}
+@keyframes tpu{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+#h-wave{position:absolute;top:10px;left:50%;transform:translateX(-50%);text-align:center;display:none;}
+#h-wave .hv{font-size:28px;color:#ff2d78;text-shadow:0 0 18px #ff2d78;}
+
+/* ── V6 DAILY POPUP ────────────────────────────────── */
+.overlay-bg{position:absolute;inset:0;background:rgba(0,0,0,.92);z-index:60;display:none;align-items:center;justify-content:center;}
+.popup-box{background:linear-gradient(160deg,#060e22,#0a1530);border:1px solid rgba(0,245,255,.22);border-radius:14px;padding:22px 18px;width:min(390px,94%);text-align:center;box-shadow:0 0 60px rgba(0,245,255,.1);}
+.daily-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:12px 0 14px;}
+.dd{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:7px 3px;text-align:center;}
+.dd.dp{border-color:rgba(0,255,136,.28);background:rgba(0,255,136,.06);}
+.dd.dt{border-color:#ffd700;background:rgba(255,215,0,.1);animation:ddg .8s infinite alternate;}
+@keyframes ddg{from{box-shadow:0 0 6px rgba(255,215,0,.2)}to{box-shadow:0 0 20px rgba(255,215,0,.45)}}
+.dd.df{opacity:.3;}
+.dd-n{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,.3);}
+.dd-e{font-size:15px;line-height:1.2;}
+.dd-a{font-family:'Bebas Neue',cursive;font-size:11px;color:#ffd700;}
+/* ── V6 VIP SCREEN ─────────────────────────────────── */
+.vip-hero{text-align:center;padding:14px;background:linear-gradient(160deg,rgba(255,170,0,.08),rgba(255,215,0,.04));border:1px solid rgba(255,170,0,.22);border-radius:12px;margin-bottom:12px;width:100%;}
+.vip-crown{font-size:46px;margin-bottom:5px;}
+.vip-htitle{font-family:'Bebas Neue',cursive;font-size:40px;letter-spacing:6px;background:linear-gradient(135deg,#ffaa00,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.vip-price{font-family:'Bebas Neue',cursive;font-size:24px;color:#ffaa00;letter-spacing:3px;}
+.vip-perks{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%;margin-bottom:12px;}
+.vip-perk{background:rgba(255,170,0,.05);border:1px solid rgba(255,170,0,.16);border-radius:8px;padding:11px;text-align:center;}
+.vp-ico{font-size:22px;margin-bottom:3px;}.vp-name{font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:2px;color:#ffaa00;}
+.vp-desc{font-size:9px;color:rgba(255,255,255,.28);}
+/* ── V6 VICTORY ────────────────────────────────────── */
+.vic-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;padding:22px 16px;text-align:center;}
+/* ── V6 AD BOX ON GAME OVER ────────────────────────── */
+.ad-revive-box{background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.18);border-radius:8px;padding:10px;margin-bottom:9px;text-align:center;width:100%;cursor:pointer;transition:all .2s;}
+.ad-revive-box:hover{border-color:rgba(0,245,255,.4);background:rgba(0,245,255,.08);}
+
+
+/* ── VIP BANNER ─────────────────────────────────────────────────────── */
+.vip-promo-banner{display:flex;align-items:center;gap:10px;background:rgba(255,170,0,.07);border:1px solid rgba(255,170,0,.28);border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .2s;margin-bottom:7px;overflow:hidden;position:relative;}
+.vip-promo-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,170,0,.06),transparent);animation:vsh 3s infinite;}
+@keyframes vsh{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.vip-promo-banner:hover{border-color:rgba(255,170,0,.55);background:rgba(255,170,0,.12);}
+.vpb-ico{font-size:26px;flex-shrink:0;}.vpb-info{flex:1;}
+.vpb-title{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:3px;color:#ffaa00;}
+.vpb-sub{font-size:9px;color:rgba(255,170,0,.55);letter-spacing:.5px;}
+.vpb-price{font-family:'Bebas Neue',cursive;font-size:14px;color:#ffaa00;letter-spacing:2px;flex-shrink:0;}
+.vip-active-badge{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,170,0,.06));border:1px solid rgba(255,215,0,.4);border-radius:10px;padding:10px 14px;margin-bottom:7px;overflow:hidden;position:relative;}
+.vip-active-badge::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,215,0,.06),transparent);animation:vsh 2.5s infinite;}
+.vab-crown{font-size:26px;flex-shrink:0;}.vab-info{flex:1;}
+.vab-title{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:3px;color:#ffd700;text-shadow:0 0 10px #ffd700;}
+.vab-perks{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap;}
+.vab-perk{font-size:8px;padding:2px 6px;border-radius:3px;background:rgba(255,215,0,.1);color:rgba(255,215,0,.8);border:1px solid rgba(255,215,0,.2);}
+#vip-hud-badge{position:absolute;bottom:58px;right:12px;font-family:'Bebas Neue',cursive;font-size:10px;letter-spacing:2px;color:#ffd700;text-shadow:0 0 8px #ffd700;display:none;pointer-events:none;z-index:20;}
+#ad-banner{position:absolute;bottom:0;left:0;right:0;height:46px;background:rgba(0,0,0,.8);border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;z-index:25;transition:transform .3s;}
+#ad-banner.hidden{transform:translateY(100%);}
+.ad-txt{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.12);}
+/* ── VIP SCREEN ──────────────────────────────────────────────────────── */
+.vip-hero{text-align:center;padding:14px;background:linear-gradient(160deg,rgba(255,170,0,.09),rgba(255,215,0,.04));border:1px solid rgba(255,170,0,.24);border-radius:12px;margin-bottom:12px;width:100%;}
+.vip-crown{font-size:48px;margin-bottom:5px;}
+.vip-htitle{font-family:'Bebas Neue',cursive;font-size:40px;letter-spacing:6px;background:linear-gradient(135deg,#ffaa00,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.vip-price{font-family:'Bebas Neue',cursive;font-size:24px;color:#ffaa00;letter-spacing:3px;}
+.vip-perks{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:12px;}
+.vip-perk{background:rgba(255,170,0,.05);border:1px solid rgba(255,170,0,.16);border-radius:9px;padding:11px;text-align:center;transition:all .2s;}
+.vip-perk:hover{border-color:rgba(255,170,0,.35);background:rgba(255,170,0,.09);}
+.vp-ico{font-size:22px;margin-bottom:3px;}.vp-name{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:#ffaa00;}
+.vp-desc{font-size:8px;color:rgba(255,255,255,.28);line-height:1.4;margin-top:2px;}
+/* ── SEASON PASS ─────────────────────────────────────────────────────── */
+.sp-header{width:100%;background:linear-gradient(135deg,rgba(180,79,255,.1),rgba(0,245,255,.06));border:1px solid rgba(180,79,255,.28);border-radius:10px;padding:13px;margin-bottom:10px;text-align:center;}
+.sp-title{font-family:'Bebas Neue',cursive;font-size:36px;letter-spacing:5px;background:linear-gradient(135deg,#b44fff,#00f5ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sp-level{font-family:'Bebas Neue',cursive;font-size:20px;color:#fff;margin:3px 0 2px;}
+.sp-xp-bar-wrap{background:rgba(255,255,255,.08);border-radius:4px;height:8px;overflow:hidden;margin:5px 0 2px;}
+.sp-xp-bar{height:100%;background:linear-gradient(90deg,#b44fff,#00f5ff);border-radius:4px;transition:width .5s;}
+.sp-xp-label{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;}
+.sp-end-date{font-size:9px;color:rgba(255,255,255,.25);letter-spacing:2px;margin-top:4px;}
+.sp-tiers{display:flex;gap:0;overflow-x:auto;width:100%;padding-bottom:8px;scrollbar-width:none;}
+.sp-tiers::-webkit-scrollbar{display:none;}
+.sp-tier{min-width:70px;display:flex;flex-direction:column;align-items:center;padding:0 3px;}
+.sp-tier-num{font-family:'Bebas Neue',cursive;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.3);margin-bottom:3px;}
+.sp-tier-num.done{color:#00ff88;}
+.sp-reward{width:58px;height:58px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 4px;position:relative;transition:all .2s;cursor:pointer;}
+.sp-reward:hover{transform:translateY(-2px);}
+.sp-reward.free-box{background:rgba(0,245,255,.07);border:2px solid rgba(0,245,255,.2);}
+.sp-reward.vip-box{background:rgba(255,215,0,.07);border:2px solid rgba(255,215,0,.18);}
+.sp-reward.unlocked.free-box{border-color:rgba(0,245,255,.55);}
+.sp-reward.unlocked.vip-box{border-color:rgba(255,215,0,.55);background:rgba(255,215,0,.1);}
+.sp-reward.claimable.free-box{border-color:#00ff88;box-shadow:0 0 10px rgba(0,255,136,.25);}
+.sp-reward.claimable.vip-box{border-color:#ffd700;box-shadow:0 0 10px rgba(255,215,0,.25);}
+.sp-reward.claimed{opacity:.38;filter:grayscale(.5);}
+.sp-reward.locked{opacity:.28;}
+.sp-reward-ico{font-size:18px;line-height:1;}.sp-reward-val{font-family:'Bebas Neue',cursive;font-size:10px;color:rgba(255,255,255,.7);line-height:1.2;}
+.sp-claim-dot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;background:#00ff88;border-radius:50%;animation:pd .8s infinite alternate;}
+@keyframes pd{from{box-shadow:0 0 3px #00ff88}to{box-shadow:0 0 11px #00ff88}}
+.sp-track-label{font-family:'Bebas Neue',cursive;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.3);}
+.sp-track-label.vl{color:rgba(255,215,0,.45);}
+.sp-xp-sources{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;margin-top:8px;}
+.sp-xp-src{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:8px 4px;text-align:center;}
+.sp-xp-ico{font-size:16px;margin-bottom:2px;}.sp-xp-val{font-family:'Bebas Neue',cursive;font-size:13px;color:#b44fff;letter-spacing:1px;}
+.sp-xp-lbl{font-size:7px;color:rgba(255,255,255,.28);letter-spacing:.5px;}
+
+
+/* ── BOSS WARNING OVERLAY ─────────────────────────────────────── */
+#boss-warning-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:35;pointer-events:none;background:rgba(0,0,0,0);transition:background .3s;}
+#boss-warning-overlay.show{background:rgba(0,0,0,.6);}
+#boss-warning-box{text-align:center;transform:scale(0);transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
+#boss-warning-overlay.show #boss-warning-box{transform:scale(1);}
+.bw-top{font-family:'Orbitron',monospace;font-size:13px;letter-spacing:6px;color:rgba(255,50,50,.9);margin-bottom:6px;animation:bwblink .4s infinite alternate;}
+@keyframes bwblink{from{opacity:1}to{opacity:.4}}
+.bw-title{font-family:'Bebas Neue',cursive;font-size:64px;letter-spacing:8px;color:#ff2020;text-shadow:0 0 40px #ff2020,0 0 80px rgba(255,0,0,.4);animation:bwshake .1s infinite alternate;}
+@keyframes bwshake{from{transform:translateX(-3px)}to{transform:translateX(3px)}}
+.bw-sub{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:4px;color:rgba(255,150,0,.9);margin-top:4px;}
+.bw-wave{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:3px;color:rgba(255,255,255,.5);margin-top:6px;}
+
+
+/* ── IN-GAME SCORE PANEL ─────────────────────────────── */
+#score-panel{position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  display:none;align-items:center;gap:12px;z-index:20;pointer-events:none;
+  background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;padding:4px 14px;}
+.sp-item{text-align:center;}
+.sp-val{font-family:'Bebas Neue',cursive;font-size:18px;color:#fff;line-height:1;}
+.sp-lbl{font-size:7px;letter-spacing:2px;color:rgba(255,255,255,.3);}
+/* ── BACK TO MENU BUTTON in shop/skins ──────────────── */
+.menu-btn-row{display:flex;gap:8px;margin-top:10px;justify-content:center;}
+/* ── BOSS DAMAGE FLASH ───────────────────────────────── */
+#boss-dmg-flash{position:absolute;inset:0;background:rgba(255,0,0,0);pointer-events:none;z-index:30;transition:background .1s;}
+/* ── DODGE STREAK ────────────────────────────────────── */
+#dodge-streak{position:absolute;top:62px;left:12px;font-family:'Bebas Neue',cursive;
+  font-size:16px;color:#00ff88;text-shadow:0 0 12px #00ff88;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s;}
+
+
+/* ── GLOBAL LEADERBOARD ──────────────────────────── */
+#global-lb-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.92);z-index:80;
+  display:none;align-items:center;justify-content:center;
+}
+#global-lb-box{
+  width:420px;background:linear-gradient(160deg,#060e22,#0a1530);
+  border:1px solid rgba(0,245,255,.28);border-radius:14px;
+  padding:22px 18px;box-shadow:0 0 60px rgba(0,245,255,.12);
+  max-height:80vh;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(0,245,255,.3) transparent;
+}
+#global-lb-box::-webkit-scrollbar{width:3px;}
+#global-lb-box::-webkit-scrollbar-thumb{background:rgba(0,245,255,.3);border-radius:2px;}
+.glb-title{
+  font-family:'Bebas Neue',cursive;font-size:36px;letter-spacing:6px;
+  text-align:center;background:linear-gradient(135deg,#00f5ff,#ff2d78);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:4px;
+}
+.glb-sub{font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.3);text-align:center;margin-bottom:14px;}
+.glb-row{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:9px;margin-bottom:6px;border:1px solid transparent;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.glb-row::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.03),transparent);pointer-events:none;}
+.glb-row.r1{background:rgba(255,215,0,.09);border-color:rgba(255,215,0,.35);}
+.glb-row.r2{background:rgba(180,180,200,.05);border-color:rgba(180,180,200,.2);}
+.glb-row.r3{background:rgba(205,127,50,.05);border-color:rgba(205,127,50,.2);}
+.glb-row.rn{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.06);}
+.glb-row.me{background:rgba(0,245,255,.06);border-color:rgba(0,245,255,.35);box-shadow:0 0 16px rgba(0,245,255,.08);}
+.glb-rank{
+  font-family:'Bebas Neue',cursive;font-size:22px;width:36px;
+  text-align:center;color:rgba(255,255,255,.3);flex-shrink:0;
+}
+.glb-rank.g{color:#ffd700;text-shadow:0 0 10px #ffd700;}
+.glb-rank.s{color:#c0c0c0;}.glb-rank.b{color:#cd7f32;}
+.glb-name{flex:1;font-size:14px;font-weight:700;color:#fff;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.glb-score{font-family:'Bebas Neue',cursive;font-size:20px;color:#ffd700;letter-spacing:2px;flex-shrink:0;}
+.glb-bar-wrap{width:100%;height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:4px;overflow:hidden;}
+.glb-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,#00f5ff,#ffd700);}
+.glb-divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,245,255,.2),transparent);margin:10px 0;}
+/* Name input on game over */
+#score-submit-box{
+  width:100%;background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.2);
+  border-radius:9px;padding:14px;margin-bottom:10px;text-align:center;
+}
+#score-submit-box p{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:1px;margin-bottom:8px;}
+#player-name-input{
+  background:rgba(0,0,0,.5);border:1px solid rgba(0,245,255,.3);border-radius:6px;
+  color:#fff;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:600;
+  padding:8px 14px;width:100%;text-align:center;outline:none;
+  transition:border-color .2s;margin-bottom:8px;letter-spacing:2px;
+}
+#player-name-input:focus{border-color:rgba(0,245,255,.7);box-shadow:0 0 12px rgba(0,245,255,.2);}
+#player-name-input::placeholder{color:rgba(255,255,255,.25);}
+.glb-status{font-size:10px;letter-spacing:2px;color:rgba(0,245,255,.5);text-align:center;min-height:16px;margin-top:4px;}
+.glb-empty{text-align:center;color:rgba(255,255,255,.25);font-size:12px;letter-spacing:2px;padding:20px 0;}
+.glb-loading{text-align:center;color:rgba(0,245,255,.4);font-size:11px;letter-spacing:2px;padding:16px 0;animation:gp 1s infinite;}
+
+
+/* ══ MONARCH SYSTEM AURAS ════════════════════════════════════════════ */
+@keyframes mBronze{0%,100%{box-shadow:0 0 8px rgba(205,127,50,.4)}50%{box-shadow:0 0 18px rgba(205,127,50,.8)}}
+@keyframes mSilver{0%{box-shadow:0 0 6px rgba(200,200,220,.3)}40%{box-shadow:0 0 22px rgba(220,220,255,.9)}100%{box-shadow:0 0 6px rgba(200,200,220,.3)}}
+@keyframes mGold{0%,100%{box-shadow:0 0 14px rgba(255,215,0,.5),inset 0 0 10px rgba(255,215,0,.05)}50%{box-shadow:0 0 28px rgba(255,215,0,.9),inset 0 0 20px rgba(255,215,0,.1)}}
+@keyframes mPlatWave{0%{box-shadow:0 0 8px rgba(100,200,255,.3),inset 0 0 0 0 rgba(100,200,255,.1)}50%{box-shadow:0 0 24px rgba(100,200,255,.7),inset 0 0 20px rgba(100,200,255,.08)}100%{box-shadow:0 0 8px rgba(100,200,255,.3),inset 0 0 0 0 rgba(100,200,255,.1)}}
+@keyframes mDiamond{0%{filter:drop-shadow(0 0 4px #aaddff)}50%{filter:drop-shadow(0 0 16px #ffffff) drop-shadow(0 0 8px #88ffff)}100%{filter:drop-shadow(0 0 4px #aaddff)}}
+@keyframes mEliteFlame{0%,100%{box-shadow:0 0 12px rgba(120,0,220,.5),0 -4px 20px rgba(150,0,255,.4)}33%{box-shadow:0 0 20px rgba(180,0,255,.7),0 -8px 30px rgba(100,0,200,.6)}66%{box-shadow:0 0 16px rgba(80,0,180,.8),0 -6px 25px rgba(200,50,255,.5)}}
+@keyframes mImmortCosmic{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes mShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+@keyframes mGlitter{0%,100%{opacity:0;transform:translateY(0) scale(0)}50%{opacity:1;transform:translateY(-10px) scale(1)}}
+@keyframes mDashFlash{0%{opacity:.8}100%{opacity:0;transform:scaleX(2)}}
+
+.m-row{position:relative;overflow:hidden;}
+.m-row.m1{animation:mBronze 2s infinite;border-color:rgba(205,127,50,.45)!important;background:rgba(205,127,50,.06)!important;}
+.m-row.m2{animation:mSilver 1.8s infinite;border-color:rgba(200,200,230,.45)!important;background:rgba(200,200,230,.05)!important;}
+.m-row.m2::after{content:'';position:absolute;top:0;left:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:mShimmer 3s 1s infinite;pointer-events:none;}
+.m-row.m3{animation:mGold 2.5s infinite;border-color:rgba(255,215,0,.55)!important;background:rgba(255,215,0,.07)!important;}
+.m-row.m4{animation:mPlatWave 1.6s infinite;border-color:rgba(100,200,255,.5)!important;background:rgba(100,200,255,.06)!important;}
+.m-row.m5{animation:mDiamond 2s infinite;border-color:rgba(180,230,255,.5)!important;background:rgba(180,230,255,.06)!important;}
+.m-row.m6{animation:mEliteFlame 1.4s infinite;border-color:rgba(150,0,255,.5)!important;background:rgba(80,0,160,.1)!important;}
+.m-row.m7{border:1px solid transparent!important;background:linear-gradient(135deg,rgba(255,0,128,.1),rgba(0,200,255,.1),rgba(200,0,255,.1),rgba(255,200,0,.1))!important;background-size:400% 400%!important;animation:mImmortCosmic 3s ease infinite!important;}
+.m-badge{font-size:8px;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:700;vertical-align:middle;}
+.mb1{background:rgba(205,127,50,.2);color:#cd7f32;border:1px solid rgba(205,127,50,.4);}
+.mb2{background:rgba(200,200,230,.15);color:#c8c8e8;border:1px solid rgba(200,200,230,.4);}
+.mb3{background:rgba(255,215,0,.15);color:#ffd700;border:1px solid rgba(255,215,0,.4);}
+.mb4{background:rgba(100,200,255,.12);color:#64c8ff;border:1px solid rgba(100,200,255,.4);}
+.mb5{background:rgba(180,230,255,.12);color:#aae6ff;border:1px solid rgba(180,230,255,.4);}
+.mb6{background:rgba(150,0,255,.15);color:#cc44ff;border:1px solid rgba(150,0,255,.4);}
+.mb7{background:linear-gradient(135deg,rgba(255,0,128,.2),rgba(0,200,255,.2));color:#fff;border:1px solid rgba(255,255,255,.3);}
+
+/* Monarch Shop Screen */
+.mon-tiers{display:flex;flex-direction:column;gap:8px;width:100%;}
+.mon-tier{border-radius:10px;padding:13px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);transition:all .2s;position:relative;overflow:hidden;}
+.mon-tier.unlocked{border-color:rgba(0,255,136,.35);background:rgba(0,255,136,.05);}
+.mon-tier.current{border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.07);box-shadow:0 0 20px rgba(255,215,0,.1);}
+.mon-tier-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.mon-tier-icon{font-size:26px;flex-shrink:0;}
+.mon-tier-info{flex:1;}
+.mon-tier-name{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:3px;}
+.mon-tier-price{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:1px;}
+.mon-perks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:6px;}
+.mon-perk{background:rgba(0,0,0,.3);border-radius:5px;padding:6px 4px;text-align:center;}
+.mon-perk-ico{font-size:14px;margin-bottom:1px;}
+.mon-perk-lbl{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,.4);}
+.mon-perk-val{font-family:'Bebas Neue',cursive;font-size:10px;color:#fff;letter-spacing:1px;}
+.mon-buy-btn{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:3px;padding:8px 18px;border-radius:5px;cursor:pointer;border:none;transition:all .2s;margin-top:8px;width:100%;}
+.mon-progress{width:100%;height:4px;background:rgba(255,255,255,.07);border-radius:2px;margin:10px 0 4px;overflow:hidden;}
+.mon-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#cd7f32,#ffd700,#00f5ff);transition:width .5s;}
+.mon-total-invested{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;text-align:center;color:rgba(255,255,255,.35);margin-bottom:4px;}
+
+/* In-game monarch visual effects */
+#monarch-dash-effect{position:absolute;inset:0;pointer-events:none;z-index:18;display:none;}
+
+
+/* ── iOS Safe Area ───────────────────────────────── */
+#app{padding-top:env(safe-area-inset-top,0px);
+     padding-bottom:env(safe-area-inset-bottom,0px);
+     padding-left:env(safe-area-inset-left,0px);
+     padding-right:env(safe-area-inset-right,0px);}
+
+/* ── Responsive scaling for small screens ─────── */
+@media(max-width:500px){
+  #app{transform-origin:top center;transform:scale(calc(100vw/480));margin:0 auto;}
+}
+@media(max-height:850px) and (max-width:500px){
+  #app{transform:scale(min(calc(100vw/480),calc(100vh/820)));transform-origin:top center;}
+}
+
+
+/* ── Responsive scaling ─────────────────────────────── */
+@media(max-width:480px){
+  #app{transform:scaleX(calc(100vw/480));transform-origin:top left;}
+}
+
+/* ── Button text always above ::before fill ─────────── */
+.bp>*,.btn>span{position:relative;z-index:1;}
+.bp{position:relative;overflow:hidden;}
+.bp::before{content:'';position:absolute;inset:0;background:var(--n);
+  transform:translateX(-105%);transition:transform .2s;}
+.bp:hover::before{transform:translateX(0);}
+
+/* ── iOS Safe Area ───────────────────────────────────── */
+#app{padding-top:env(safe-area-inset-top,0px);
+     padding-bottom:env(safe-area-inset-bottom,0px);}
+),calc(100vh/820)));transform-origin:top center;}
+}
+
+
+/* Mode HUD visibility (controlled by JS) */
+#h-timer.visible,#h-wave.visible{display:flex!important;}
+</style>
+
+</head>
+
+<body>
+<noscript><div style="color:#fff;background:#010610;font-family:sans-serif;text-align:center;padding:40px;font-size:18px;">⚠️ JavaScript is required to play Shadow Dash Ultra. Please enable JavaScript in your browser.</div></noscript>
+<div id="app">
+<div id="app">
+<canvas id="bg" width="480" height="820"></canvas>
+<canvas id="gc" width="480" height="820"></canvas>
+
+<!-- HUD -->
+<div id="hud" style="display:none">
+  <div id="hs-wrap"><div class="hl">Score</div><div class="hv" id="hv-sc">0</div></div>
+  <div id="hb-wrap"><div class="hl">Best</div><div class="hv" id="hv-bs">0</div></div>
+  <div id="hc-wrap"><div class="hv" id="hv-co">💰 0</div></div>
+  <div id="combo-hud" style="opacity:0"></div>
+  <div id="zone-hud"></div>
+  <div id="boss-wrap"><div id="boss-lbl">⚠ BOSS WAVE</div><div id="boss-track"><div id="boss-fill" style="width:100%"></div></div></div>
+  <div id="pubar">
+    <div class="pu" id="pu0">🛡️<div class="pt" id="pt0" style="transform:scaleX(0)"></div></div>
+    <div class="pu" id="pu1">🧲<div class="pt" id="pt1" style="transform:scaleX(0)"></div></div>
+    <div class="pu" id="pu2">⚡<div class="pt" id="pt2" style="transform:scaleX(0)"></div></div>
+    <div class="pu" id="pu3">👻<div class="pt" id="pt3" style="transform:scaleX(0)"></div></div>
+    <div class="pu" id="pu4">💣<div class="pt" id="pt4" style="transform:scaleX(0)"></div></div>
+    <div class="pu" id="pu5">✨<div class="pt" id="pt5" style="transform:scaleX(0)"></div></div>
+    <div class="pu" id="pu6">🔥<div class="pt" id="pt6" style="transform:scaleX(0)"></div></div>
+    <div class="pu" id="pu7">🧊<div class="pt" id="pt7" style="transform:scaleX(0)"></div></div>
+  </div>
+  <div id="wx-hud"></div>
+  <div id="mode-badge" style="position:absolute;bottom:58px;left:12px;"></div>
+  <div id="h-timer"><div class="hl">TIME</div><div class="hv" id="hv-tm">90</div></div>
+  <div id="h-wave"><div class="hl">WAVE</div><div class="hv" id="hv-wave">1/5</div></div>
+  <div id="dodge-streak"></div>
+  <div id="boss-dmg-flash"></div>
+  <div id="vip-hud-badge" style="position:absolute;bottom:58px;right:12px;font-family:'Bebas Neue',cursive;font-size:10px;letter-spacing:2px;color:#ffd700;text-shadow:0 0 8px #ffd700;display:none;pointer-events:none;z-index:20;">👑 VIP</div>
+</div>
+<div id="ad-banner" class="hidden" style="position:absolute;bottom:0;left:0;right:0;height:46px;background:rgba(0,0,0,.8);border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;z-index:25;"><div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.12);">[ ADMOB BANNER AD — REPLACE WITH REAL SDK ]</div></div>
+
+<!-- BOSS WARNING OVERLAY -->
+<div id="score-panel"><div class="sp-item"><div class="sp-val" id="sp-sc">0</div><div class="sp-lbl">SCORE</div></div><div class="sp-item"><div class="sp-val" id="sp-co">0</div><div class="sp-lbl">COINS</div></div><div class="sp-item"><div class="sp-val" id="sp-spd">6.5</div><div class="sp-lbl">SPEED</div></div></div>
+<div id="boss-warning-overlay">
+  <div id="boss-warning-box">
+    <div class="bw-top">⚠ WARNING ⚠</div>
+    <div class="bw-title">BOSS WAVE!</div>
+    <div class="bw-sub">A BOSS IS APPROACHING</div>
+    <div class="bw-wave" id="bw-wave-lbl">WAVE 1 / 5</div>
+  </div>
+</div>
+
+
+<!-- ══ GLOBAL LEADERBOARD OVERLAY ════════════════════════ -->
+<div id="global-lb-overlay">
+  <div id="global-lb-box">
+    <div class="glb-title">🌐 GLOBAL LEADERBOARD</div>
+    <div class="glb-sub">TOP PLAYERS WORLDWIDE</div>
+    <div id="glb-list"><div class="glb-loading">LOADING...</div></div>
+    <div class="glb-divider"></div>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button class="btn bp sm" onclick="closeGlobalLB()"><span>← BACK</span></button>
+      <button class="btn bp sm" onclick="fetchLeaderboard()" style="border-color:rgba(0,245,255,.4);"><span>🔄 REFRESH</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- HOME -->
+<div class="scr" id="s-home">
+  <div class="si" style="justify-content:center;align-items:center;">
+    <div style="text-align:center;margin-bottom:6px;">
+      <div class="logo">SHADOW<br>DASH</div>
+      <div class="logo-tag">ULTRA EDITION</div>
+      <div class="logo-ver">★ V6.0 ★</div>
+    </div>
+    <div class="cbar" style="justify-content:center;margin-bottom:10px;">
+      <div class="cdot"></div><div class="cnum" id="home-c">0</div>
+      <div style="font-size:9px;color:rgba(255,215,0,.4);letter-spacing:2px;margin-left:4px;">COINS</div>
+    </div>
+    <button class="btn bp" id="btn-play" onclick="openModes()" style="font-size:24px;padding:16px 76px;margin-bottom:12px;"><span>▶ SELECT MODE</span></button>
+    <div style="width:370px;">
+      <div class="vip-promo-banner" id="vip-promo" onclick="openVIP()">
+        <div class="vpb-ico">👑</div>
+        <div class="vpb-info"><div class="vpb-title">VIP PASS</div><div class="vpb-sub">2× COINS · NO ADS · FREE REVIVE · 1.2× SCORE · VIPER SKIN</div></div>
+        <div class="vpb-price">$4.99/MO</div>
+      </div>
+      <div class="vip-active-badge" id="vip-active-badge" style="display:none;">
+        <div class="vab-crown">👑</div>
+        <div class="vab-info">
+          <div class="vab-title">👑 VIP ACTIVE ✓</div>
+          <div class="vab-perks"><span class="vab-perk">2× COINS</span><span class="vab-perk">NO ADS</span><span class="vab-perk">FREE REVIVE</span><span class="vab-perk">1.2× SCORE</span><span class="vab-perk">VIPER SKIN</span><span class="vab-perk">VIP SEASON</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ngrid" style="width:370px;">
+      <div class="nb" onclick="openShop()"><span class="ni">🛒</span>SHOP</div>
+      <div class="nb" onclick="openSkins()"><span class="ni">👤</span>SKINS</div>
+      <div class="nb" onclick="openMissions()"><span class="ni">📋</span>MISSIONS</div>
+      <div class="nb" onclick="openLB()"><span class="ni">🌐</span>LEADERBOARD</div>
+      <div class="nb" onclick="openGlobalLB()" style="border-color:rgba(0,245,255,.25);"><span class="ni">🏅</span>GLOBAL LB</div>
+      <div class="nb" onclick="openLog()"><span class="ni">📜</span>RUN LOG</div>
+      <div class="nb" onclick="openAch()"><span class="ni">🏆</span>ACHIEVE</div>
+      <div class="nb" onclick="openSettings()"><span class="ni">⚙️</span>SETTINGS</div>
+      <div class="nb rn" onclick="openStore()"><span class="ni">💎</span>STORE</div>
+      <div class="nb" id="skin-nbtn" onclick="openSkins()"><span class="ni" id="home-em">🤖</span><span id="home-snm">CYBER</span></div>
+    </div>
+    <div style="margin-top:12px;font-size:10px;letter-spacing:3px;color:rgba(0,245,255,.25);text-align:center;">SPACE/TAP=JUMP · ↓/SWIPE=SLIDE</div>
+  </div>
+</div>
+
+<!-- SHOP -->
+<div class="scr hide" id="s-shop">
+  <div class="si">
+    <div class="ptitle">⚡ SHOP</div>
+    <div class="cbar"><div class="cdot"></div><div class="cnum" id="shop-c">0</div></div>
+    <div class="tabrow">
+      <div class="tab on" onclick="shopTab('upg',this)">UPGRADES</div>
+      <div class="tab" onclick="shopTab('pu',this)">POWER-UPS</div>
+    </div>
+    <div class="g2" id="shop-g"></div>
+    <div style="height:12px;"></div>
+    <button class="btn bp sm" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- STORE -->
+<div class="scr hide" id="s-store">
+  <div class="si">
+    <div class="ptitle" style="color:var(--a);text-shadow:0 0 24px var(--a);">💎 STORE</div>
+    <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.28);margin-bottom:10px;">REAL MONEY PURCHASES (DEMO)</div>
+    <div class="cbar"><div class="cdot"></div><div class="cnum" id="store-c">0</div></div>
+    <div class="g2" id="store-g"></div>
+    <div style="height:12px;"></div>
+    <button class="btn bp sm" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- SKINS -->
+<div class="scr hide" id="s-skins">
+  <div class="si">
+    <div class="ptitle" style="color:var(--p);text-shadow:0 0 24px var(--p);">👤 SKINS</div>
+    <div class="cbar"><div class="cdot"></div><div class="cnum" id="skins-c">0</div></div>
+    <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.22);margin-bottom:8px;" id="skins-cnt"></div>
+    <div class="g3" id="skins-g"></div>
+    <div style="height:12px;"></div>
+    <button class="btn bp pur sm" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- LB -->
+<div class="scr hide" id="s-lb">
+  <div class="si">
+    <div class="ptitle" style="color:#fff;">🌐 LEADERBOARD</div>
+    <div style="font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.22);margin-bottom:8px;">GLOBAL RANKINGS</div>
+    <div class="lb-head" id="lb-mycard"></div>
+    <div id="lb-list" style="width:100%;"></div>
+    <button class="btn bp sm" style="margin-top:8px;" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="scr hide" id="s-log">
+  <div class="si">
+    <div class="ptitle" style="color:var(--n);">📜 RUN LOG</div>
+    <div class="sg" id="log-stats"></div>
+    <div class="hdiv"></div>
+    <div style="font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.28);margin-bottom:8px;align-self:flex-start;border-left:3px solid var(--n);padding-left:8px;">RECENT RUNS</div>
+    <div id="log-list" style="width:100%;"></div>
+    <button class="btn bp sm" style="margin-top:8px;" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- MISSIONS -->
+<div class="scr hide" id="s-missions">
+  <div class="si">
+    <div class="ptitle" style="color:var(--p);font-size:36px;">📋 DAILY MISSIONS</div>
+    <div class="cbar"><div class="cdot"></div><div class="cnum" id="mis-c">0</div></div>
+    <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.22);margin-bottom:8px;" id="mis-reset"></div>
+    <div id="mis-list" style="width:100%;"></div>
+    <button class="btn bp pur sm" style="margin-top:8px;" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- ACHIEVEMENTS -->
+<div class="scr hide" id="s-ach">
+  <div class="si">
+    <div class="ptitle" style="font-size:36px;">🏆 ACHIEVEMENTS</div>
+    <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.22);margin-bottom:8px;" id="ach-p"></div>
+    <div class="g2" id="ach-g"></div>
+    <button class="btn bp gold sm" style="margin-top:11px;" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="scr hide" id="s-settings">
+  <div class="si">
+    <div class="ptitle" style="color:#fff;font-size:36px;">⚙️ SETTINGS</div>
+    <div id="set-body" style="width:100%;"></div>
+    <div class="hdiv"></div>
+    <button class="btn bp red sm" onclick="if(confirm('Reset ALL data?')){resetAll();}"><span>🗑 RESET DATA</span></button>
+    <button class="btn bp sm" style="margin-top:8px;" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div class="scr hide" id="s-over">
+  <div class="si gowrap">
+    <div class="gotag" id="go-mode-tag">— GAME OVER —</div>
+    <div class="goscore" id="go-sc">0</div>
+    <div class="gobest" id="go-bs">BEST: 0</div>
+    <div class="gonew" id="go-new" style="display:none;">🎉 NEW RECORD!</div>
+    <div class="godiv"></div>
+    <div class="gostats" id="go-stats"></div>
+    <div id="score-submit-box">
+      <p>📝 ENTER YOUR NAME TO SAVE YOUR SCORE GLOBALLY</p>
+      <input type="text" id="player-name-input" maxlength="16" placeholder="YOUR NAME / TAG" autocomplete="off" spellcheck="false"/>
+      <button class="btn bp gold sm" onclick="handleSubmitScore()" id="btn-submit-score" style="width:100%;padding:10px;"><span>🌐 SUBMIT TO GLOBAL LB</span></button>
+      <div class="glb-status" id="submit-status"></div>
+    </div>
+    <div class="ad-revive-box" id="ad-revive-box" onclick="watchAdRevive()">
+      <div style="font-size:9px;color:rgba(0,245,255,.4);letter-spacing:1px;margin-bottom:4px;">📺 WATCH A SHORT AD TO CONTINUE FREE</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:3px;color:#00f5ff;">▶ WATCH AD — FREE REVIVE</div>
+    </div>
+    <div class="rvbox" id="rv-box">
+      <p>OR SPEND <strong id="rv-cost" style="color:var(--g);">30</strong> COINS</p>
+      <button class="btn bp gold sm" id="btn-revive" onclick="doRevive()"><span>💰 REVIVE</span></button>
+    </div>
+    <button class="btn bp" id="btn-restart" onclick="restartGame()" style="margin:3px 0;"><span>▶ PLAY AGAIN</span></button>
+    <button class="btn bp sm" onclick="goHome()"><span>MENU</span></button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODE SELECT ══════════════════════════════════════════════════════════ -->
+<div class="scr hide" id="s-modes">
+  <div class="si" style="padding-top:28px;">
+    <div style="font-family:'Bebas Neue',cursive;font-size:44px;letter-spacing:5px;color:#fff;margin-bottom:4px;">🎮 SELECT MODE</div>
+    <div style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.22);margin-bottom:14px;">CHOOSE YOUR CHALLENGE</div>
+    <div class="mode-card mc-endless" onclick="startGameMode('endless')">
+      <div class="mc-row">
+        <div class="mc-ico">🏃</div>
+        <div class="mc-info">
+          <div class="mc-name" style="color:#00f5ff;">ENDLESS RUN</div>
+          <div class="mc-desc">Run forever. Score as high as possible. Classic mode.</div>
+          <div class="mc-best" id="mc-be">BEST: 0</div>
+        </div>
+        <div class="mc-badge" style="background:rgba(0,245,255,.1);color:#00f5ff;border:1px solid rgba(0,245,255,.2);">FREE</div>
+      </div>
+    </div>
+    <div class="mode-card mc-timeatk" onclick="startGameMode('timeatk')">
+      <div class="mc-row">
+        <div class="mc-ico">⏱️</div>
+        <div class="mc-info">
+          <div class="mc-name" style="color:#ff8c00;">TIME ATTACK</div>
+          <div class="mc-desc">Survive 90 seconds. Faster speed. 2× coins. Score bonus!</div>
+          <div class="mc-best" id="mc-bt">BEST: 0</div>
+        </div>
+        <div class="mc-badge" style="background:rgba(255,140,0,.1);color:#ff8c00;border:1px solid rgba(255,140,0,.2);">HOT</div>
+      </div>
+    </div>
+    <div class="mode-card mc-bossrush" onclick="startGameMode('bossrush')">
+      <div class="mc-row">
+        <div class="mc-ico">⚔️</div>
+        <div class="mc-info">
+          <div class="mc-name" style="color:#ff2d78;">BOSS RUSH</div>
+          <div class="mc-desc">Face 5 brutal bosses. Beat all 5 for huge coin reward!</div>
+          <div class="mc-best" id="mc-bb">CLEARED: 0×</div>
+        </div>
+        <div class="mc-badge" style="background:rgba(255,45,120,.1);color:#ff2d78;border:1px solid rgba(255,45,120,.2);">HARD</div>
+      </div>
+    </div>
+    <button class="btn bp sm" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- ══ VIP PASS ═══════════════════════════════════════════════════════════ -->
+<div class="scr hide" id="s-vip">
+  <div class="si">
+    <div class="vip-hero">
+      <div class="vip-crown">👑</div>
+      <div class="vip-htitle">VIP PASS</div>
+      <div class="vip-price" id="vip-status-lbl">$4.99 / MONTH</div>
+      <div style="font-size:9px;color:rgba(255,170,0,.4);letter-spacing:2px;">CANCEL ANYTIME · AUTO-RENEWS</div>
+    </div>
+    <div style="font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:4px;color:rgba(255,170,0,.45);align-self:flex-start;border-left:3px solid #ffaa00;padding-left:8px;margin-bottom:10px;">ALL 8 PERKS INCLUDED</div>
+    <div class="vip-perks">
+      <div class="vip-perk"><div class="vp-ico">💰</div><div class="vp-name">2× COINS</div><div class="vp-desc">Every coin counts double in all 3 game modes</div></div>
+      <div class="vip-perk"><div class="vp-ico">🚫</div><div class="vp-name">NO ADS</div><div class="vp-desc">Removes all banner and interstitial ads permanently</div></div>
+      <div class="vip-perk"><div class="vp-ico">🛡️</div><div class="vp-name">FREE REVIVE/DAY</div><div class="vp-desc">One free daily revive — continue any run for free</div></div>
+      <div class="vip-perk"><div class="vp-ico">🏆</div><div class="vp-name">1.2× SCORE BOOST</div><div class="vp-desc">Automatic score multiplier — dominate leaderboard</div></div>
+      <div class="vip-perk"><div class="vp-ico">🎁</div><div class="vp-name">+50 COINS/DAY</div><div class="vp-desc">Bonus 50 coins added on every daily login</div></div>
+      <div class="vip-perk"><div class="vp-ico">👑</div><div class="vp-name">VIPER SKIN</div><div class="vp-desc">Exclusive gold skin — MEGA score + ALL bonuses active</div></div>
+      <div class="vip-perk"><div class="vp-ico">🎫</div><div class="vp-name">VIP SEASON PASS</div><div class="vp-desc">Claim ALL gold premium tier rewards in Season Pass</div></div>
+      <div class="vip-perk"><div class="vp-ico">⭐</div><div class="vp-name">VIP BADGE</div><div class="vp-desc">👑 Crown badge shown next to your leaderboard name</div></div>
+    </div>
+    <button class="btn bp" id="btn-vip-buy" onclick="buyVIP()" style="border-color:#ffaa00;color:#ffaa00;font-size:18px;padding:13px 46px;margin-bottom:8px;"><span>👑 GET VIP — $4.99/MO</span></button>
+    <button class="btn bp sm" onclick="restoreVIP()" style="margin-bottom:8px;"><span>RESTORE PURCHASE</span></button>
+    <div style="font-size:8px;color:rgba(255,255,255,.17);letter-spacing:1px;text-align:center;line-height:1.7;margin-bottom:12px;">Renews monthly. Cancel in Google Play / App Store.<br>Purchase = agreement to Terms &amp; Privacy Policy.</div>
+    <button class="btn bp sm" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+
+<!-- ══ BOSS RUSH VICTORY ═══════════════════════════════════════════════════ -->
+<div class="scr hide" id="s-victory">
+  <div class="si vic-wrap">
+    <div style="font-family:'Bebas Neue',cursive;font-size:52px;color:#ffd700;text-shadow:0 0 40px #ffd700;letter-spacing:6px;animation:gp 1.5s infinite;">🏆 VICTORY!</div>
+    <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:5px;color:rgba(255,215,0,.45);margin-bottom:18px;">ALL 5 BOSSES DEFEATED</div>
+    <div style="font-family:'Bebas Neue',cursive;font-size:70px;color:#fff;text-shadow:0 0 40px #ffd700;" id="vic-score">0</div>
+    <div style="font-family:'Bebas Neue',cursive;font-size:22px;color:#ffd700;margin-bottom:16px;" id="vic-reward"></div>
+    <div style="width:220px;height:1px;margin:0 auto 18px;background:linear-gradient(90deg,transparent,rgba(0,245,255,.3),transparent);"></div>
+    <button class="btn bp" id="btn-vic-claim" style="border-color:#ffd700;color:#ffd700;font-size:20px;padding:14px 52px;margin-bottom:10px;"><span>🎁 CLAIM REWARD</span></button>
+    <button class="btn bp sm" onclick="goHome()"><span>MENU</span></button>
+  </div>
+</div>
+
+<!-- ══ DAILY LOGIN POPUP ═══════════════════════════════════════════════════ -->
+<div class="overlay-bg" id="daily-overlay">
+  <div class="popup-box">
+    <div style="font-family:'Bebas Neue',cursive;font-size:36px;letter-spacing:5px;color:#ffd700;text-shadow:0 0 18px #ffd700;">🎁 DAILY REWARD</div>
+    <div style="font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.3);" id="streak-lbl">LOGIN STREAK: 1 DAY</div>
+    <div class="daily-grid" id="daily-grid"></div>
+    <div id="daily-claim-area"></div>
+  </div>
+</div>
+</div>
+
+<!-- ══ SEASON PASS ════════════════════════════════════════════════════════ -->
+<div class="scr hide" id="s-season">
+  <div class="si">
+    <div class="sp-header">
+      <div class="sp-title">🎫 SEASON PASS</div>
+      <div class="sp-level" id="sp-level-lbl">LEVEL 1</div>
+      <div class="sp-xp-bar-wrap"><div class="sp-xp-bar" id="sp-xp-bar" style="width:0%"></div></div>
+      <div class="sp-xp-label" id="sp-xp-lbl">0 / 200 XP TO NEXT LEVEL</div>
+      <div class="sp-end-date" id="sp-end-date">SEASON ENDS IN 30 DAYS</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:6px;">
+      <div class="sp-track-label">🆓 FREE REWARDS</div>
+      <div class="sp-track-label vl">👑 VIP REWARDS</div>
+    </div>
+    <div class="sp-tiers" id="sp-tiers"></div>
+    <div style="font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.26);margin:10px 0 6px;align-self:flex-start;">⚡ HOW TO EARN XP</div>
+    <div class="sp-xp-sources">
+      <div class="sp-xp-src"><div class="sp-xp-ico">🏃</div><div class="sp-xp-val">+15</div><div class="sp-xp-lbl">PER RUN</div></div>
+      <div class="sp-xp-src"><div class="sp-xp-ico">💰</div><div class="sp-xp-val">+1</div><div class="sp-xp-lbl">PER COIN</div></div>
+      <div class="sp-xp-src"><div class="sp-xp-ico">📋</div><div class="sp-xp-val">+50</div><div class="sp-xp-lbl">MISSION</div></div>
+      <div class="sp-xp-src"><div class="sp-xp-ico">⚔️</div><div class="sp-xp-val">+100</div><div class="sp-xp-lbl">BOSS WIN</div></div>
+      <div class="sp-xp-src"><div class="sp-xp-ico">🏆</div><div class="sp-xp-val">+30</div><div class="sp-xp-lbl">ACHIEVE</div></div>
+      <div class="sp-xp-src"><div class="sp-xp-ico">📅</div><div class="sp-xp-val">+25</div><div class="sp-xp-lbl">DAILY LOGIN</div></div>
+    </div>
+    <div id="sp-vip-promo" style="width:100%;margin-top:12px;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.22);border-radius:9px;padding:12px;text-align:center;">
+      <div style="font-family:'Bebas Neue',cursive;font-size:16px;color:#ffd700;letter-spacing:3px;margin-bottom:4px;">👑 UNLOCK VIP REWARDS</div>
+      <div style="font-size:10px;color:rgba(255,215,0,.5);letter-spacing:1px;margin-bottom:9px;">VIP Pass unlocks ALL gold tier rewards instantly</div>
+      <button class="btn bp" onclick="openVIP()" style="border-color:#ffd700;color:#ffd700;font-size:13px;padding:8px 28px;"><span>GET VIP — $4.99/MO</span></button>
+    </div>
+    <div style="height:12px;"></div>
+    <button class="btn bp sm" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div>
+<!-- ══ MONARCH LEVELS ════════════════════════════════════════════════ -->
+<div class="scr hide" id="s-monarch">
+  <div class="si">
+    <div style="text-align:center;padding:14px;background:linear-gradient(135deg,rgba(205,127,50,.08),rgba(255,215,0,.05),rgba(150,0,255,.08));border:1px solid rgba(255,215,0,.25);border-radius:12px;margin-bottom:10px;width:100%;">
+      <div style="font-size:36px;margin-bottom:4px;">👑</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:38px;letter-spacing:6px;background:linear-gradient(135deg,#cd7f32,#ffd700,#64c8ff,#cc44ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">MONARCH</div>
+      <div style="font-size:9px;letter-spacing:4px;color:rgba(255,255,255,.3);margin-bottom:8px;">EXCLUSIVE INVESTOR RANKS</div>
+      <div class="mon-total-invested" id="mon-invested-lbl">TOTAL INVESTED: $0.00</div>
+      <div class="mon-progress"><div class="mon-prog-fill" id="mon-prog" style="width:0%"></div></div>
+      <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.25);" id="mon-next-lbl">$0.99 TO UNLOCK MONARCH BRONZE</div>
+    </div>
+    <div style="font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:4px;color:rgba(255,255,255,.25);align-self:flex-start;border-left:3px solid #ffd700;padding-left:8px;margin-bottom:8px;">ALL 7 MONARCH LEVELS</div>
+    <div class="mon-tiers" id="mon-tiers-list"></div>
+    <div style="font-size:8px;color:rgba(255,255,255,.18);text-align:center;margin-top:10px;letter-spacing:1px;line-height:1.7;">
+      All purchases are one-time investments. Monarch level is permanent.<br>
+      Abilities are personal stat boosts only — no authority over other players.
+    </div>
+    <div style="height:10px;"></div>
+    <button class="btn bp sm" onclick="goHome()"><span>← BACK</span></button>
+  </div>
+</div
+</div>
+</div>
+<script>
+'use strict';
+//  SHADOW DASH ULTRA V5 — Massively Improved Visuals
+// ══════════════════════════════════════════════════════════
+const GC=document.getElementById('gc'),X=GC.getContext('2d');
+const BG=document.getElementById('bg'),BX=BG.getContext('2d');
+const W=480,H=820;GC.width=BG.width=W;GC.height=BG.height=H;
+
+// ── SAVE ──────────────────────────────────────────────────
+const LS={g:(k,d)=>{try{const v=localStorage.getItem('sdu6_'+k);return v===null?d:JSON.parse(v);}catch{return d;}},
+          s:(k,v)=>{try{localStorage.setItem('sdu6_'+k,JSON.stringify(v));}catch{}}};
+const S={
+  coins:LS.g('coins',0),best:LS.g('best',0),totalCoins:LS.g('tc',0),
+  totalRuns:LS.g('runs',0),totalDist:LS.g('dist',0),bestCombo:LS.g('bc',0),
+  skins:LS.g('skins',['cyber']),skin:LS.g('skin','cyber'),
+  upgrades:LS.g('upg',{}),missions:LS.g('mis',null),mDay:LS.g('mday',''),
+  ach:LS.g('ach',{}),settings:LS.g('set',{particles:true,shake:true,fps:false,trails:true}),
+  nextPU:LS.g('npu',{}),runLog:LS.g('rlog',[]),
+  bestTA:LS.g('bta',0),bestBR:LS.g('bbr',0),
+  lastLogin:LS.g('ll',''),streak:LS.g('str',0),
+};
+function sv(){LS.s('coins',S.coins);LS.s('best',S.best);LS.s('tc',S.totalCoins);LS.s('runs',S.totalRuns);
+  LS.s('dist',S.totalDist);LS.s('bc',S.bestCombo);LS.s('skins',S.skins);LS.s('skin',S.skin);
+  LS.s('upg',S.upgrades);LS.s('mis',S.missions);LS.s('mday',S.mDay);LS.s('ach',S.ach);
+  LS.s('set',S.settings);LS.s('npu',S.nextPU);LS.s('rlog',S.runLog);
+  LS.s('bta',S.bestTA);LS.s('bbr',S.bestBR);LS.s('ll',S.lastLogin);LS.s('str',S.streak);}
+
+// ── 22 SKINS ─────────────────────────────────────────────
+const SKINS={
+  cyber:  {name:'CYBER',  em:'🤖',c:'#00f5ff',g:'#0088ff',tr:'#00f5ff',  price:0,   desc:'Default runner',         bonus:'none',     rar:'free'},
+  flame:  {name:'FLAME',  em:'🔥',c:'#ff6600',g:'#ff3300',tr:'#ffaa00',  price:200, desc:'+1 coin per pickup',      bonus:'extracoin',rar:'common'},
+  ghost:  {name:'GHOST',  em:'👻',c:'#ccccff',g:'#9999ff',tr:'#ffffff',  price:350, desc:'Start with Ghost power',  bonus:'ghost',    rar:'common'},
+  storm:  {name:'STORM',  em:'⚡',c:'#ccff00',g:'#aaee00',tr:'#ffff44',  price:500, desc:'Higher jumps',            bonus:'highjump', rar:'rare'},
+  ninja:  {name:'NINJA',  em:'🥷',c:'#4466aa',g:'#6688cc',tr:'#334466',  price:400, desc:'Slide 2× longer',         bonus:'slide2x',  rar:'rare'},
+  robot:  {name:'ROBOT',  em:'🦾',c:'#aaaaaa',g:'#ffffff',tr:'#888888',  price:300, desc:'Triple jump',             bonus:'triplejump',rar:'common'},
+  shadow: {name:'SHADOW', em:'🌑',c:'#9900ff',g:'#cc00ff',tr:'#6600cc',  price:800, desc:'Coins worth ×2',          bonus:'x2coin',   rar:'epic',p2w:true},
+  dragon: {name:'DRAGON', em:'🐉',c:'#ff2200',g:'#ff5500',tr:'#aa1100',  price:1200,desc:'Start Shield + Magnet',   bonus:'shieldmag',rar:'epic',p2w:true},
+  angel:  {name:'ANGEL',  em:'😇',c:'#ffeecc',g:'#ffdd88',tr:'#ffffee',  price:1500,desc:'Free revive once/run',    bonus:'freerevive',rar:'epic',p2w:true},
+  galaxy: {name:'GALAXY', em:'🌌',c:'#00ffee',g:'#00ccff',tr:'#ff00ff',  price:2000,desc:'ALL bonuses active',      bonus:'all',      rar:'legendary',p2w:true},
+  demon:  {name:'DEMON',  em:'😈',c:'#ff0033',g:'#ff3300',tr:'#880022',  price:2500,desc:'×3 score + coins',        bonus:'mega',     rar:'legendary',p2w:true},
+  ice:    {name:'ICE',    em:'🧊',c:'#88eeff',g:'#44ccff',tr:'#aaffff',  price:450, desc:'Start with Freeze power', bonus:'startice', rar:'rare'},
+  samurai:{name:'SAMURAI',em:'⚔️',c:'#cc2200',g:'#ff4400',tr:'#ff8800',  price:600, desc:'+20% score in Zone 1',    bonus:'zone1',    rar:'rare'},
+  alien:  {name:'ALIEN',  em:'👽',c:'#00ff44',g:'#00cc33',tr:'#00ff88',  price:550, desc:'Mini-magnet always on',   bonus:'minimagnet',rar:'rare'},
+  vampire:{name:'VAMPIRE',em:'🧛',c:'#880022',g:'#cc0044',tr:'#440011',  price:700, desc:'Gain coin on near miss',  bonus:'vampire',  rar:'epic'},
+  phoenix:{name:'PHOENIX',em:'🦅',c:'#ff8800',g:'#ffcc00',tr:'#ff4400',  price:900, desc:'Auto-revive once',        bonus:'phoenixrevive',rar:'epic'},
+  mech:   {name:'MECH',   em:'🤖',c:'#446688',g:'#88aacc',tr:'#334455',  price:650, desc:'Shield absorbs 2 hits',   bonus:'doubshield',rar:'rare'},
+  titan:  {name:'TITAN',  em:'🗿',c:'#888866',g:'#aaaaaa',tr:'#666655',  price:750, desc:'Slower speed ramp',       bonus:'slowramp', rar:'rare'},
+  void:   {name:'VOID',   em:'🕳️',c:'#220033',g:'#660099',tr:'#110022',  price:1800,desc:'See through obstacles',   bonus:'voidvision',rar:'epic',p2w:true},
+  neon:   {name:'NEON',   em:'💡',c:'#ff00ff',g:'#cc00cc',tr:'#ff88ff',  price:850, desc:'Trail burns obstacles',   bonus:'trailburn',rar:'epic'},
+  toxic:  {name:'TOXIC',  em:'☣️',c:'#88ff00',g:'#aaff44',tr:'#66cc00',  price:950, desc:'Combo multiplies coins',  bonus:'toxiccombo',rar:'epic'},
+  crystal:{name:'CRYSTAL',em:'💎',c:'#88ffff',g:'#44ffcc',tr:'#ccffff',  price:3000,desc:'ULTIMATE: ×4 everything', bonus:'crystal',  rar:'legendary',p2w:true},
+};
+const RAR_COL={free:'rgba(200,200,200,.5)',common:'rgba(0,245,255,.5)',rare:'rgba(0,150,255,.7)',epic:'rgba(180,79,255,.8)',legendary:'rgba(255,215,0,.95)'};
+const RAR_BG ={free:'rgba(255,255,255,.03)',common:'rgba(0,245,255,.04)',rare:'rgba(0,100,255,.06)',epic:'rgba(180,79,255,.08)',legendary:'rgba(255,215,0,.1)'};
+
+// ── UPGRADES / ACHIEVEMENTS / MISSIONS ───────────────────
+const UPGRADES={
+  shield_dur:  {name:'Shield+',   em:'🛡️',desc:'Shield lasts 50% longer/level',levels:3,base:100,mult:2,  p2w:false},
+  magnet_range:{name:'Magnet+',   em:'🧲',desc:'Magnet pulls farther',          levels:3,base:80, mult:2,  p2w:false},
+  start_coins: {name:'Headstart', em:'💰',desc:'Start with 5 bonus coins/level',levels:3,base:150,mult:2.5,p2w:true},
+  triple_jump: {name:'3rd Jump',  em:'🦘',desc:'Unlock triple jump',            levels:1,base:400,mult:1,  p2w:true},
+  cheap_revive:{name:'Revive−',   em:'💊',desc:'Revive costs less coins',       levels:2,base:300,mult:2,  p2w:true},
+  score_boost: {name:'Score×',    em:'🏆',desc:'×1.5 score per level',          levels:2,base:500,mult:3,  p2w:true},
+  auto_magnet: {name:'AutoMag',   em:'🔮',desc:'Magnet always active',          levels:1,base:800,mult:1,  p2w:true},
+  coin_bonus:  {name:'GoldRush',  em:'✨',desc:'+1 bonus coin per pickup',      levels:2,base:600,mult:2.5,p2w:true},
+};
+const ACH=[
+  {id:'run1',  em:'👟',name:'FIRST STEP',   desc:'Complete first run',   chk:()=>S.totalRuns>=1},
+  {id:'run10', em:'🎖️',name:'VETERAN',      desc:'10 total runs',        chk:()=>S.totalRuns>=10},
+  {id:'run50', em:'🏅',name:'DEDICATED',    desc:'50 total runs',        chk:()=>S.totalRuns>=50},
+  {id:'sc1k',  em:'🔢',name:'MILLENNIAL',   desc:'Score 1,000',          chk:()=>S.best>=1000},
+  {id:'sc5k',  em:'👑',name:'LEGENDARY',    desc:'Score 5,000',          chk:()=>S.best>=5000},
+  {id:'sc10k', em:'🌟',name:'GODLIKE',      desc:'Score 10,000',         chk:()=>S.best>=10000},
+  {id:'c100',  em:'💰',name:'COIN HOARD',   desc:'100 total coins',      chk:()=>S.totalCoins>=100},
+  {id:'c1k',   em:'🥇',name:'GOLD KING',    desc:'1,000 total coins',    chk:()=>S.totalCoins>=1000},
+  {id:'cb10',  em:'🔥',name:'COMBO KING',   desc:'10× combo',            chk:()=>S.bestCombo>=10},
+  {id:'cb20',  em:'💥',name:'UNSTOPPABLE',  desc:'20× combo',            chk:()=>S.bestCombo>=20},
+  {id:'sk5',   em:'👗',name:'FASHIONISTA',  desc:'Own 5 skins',          chk:()=>S.skins.length>=5},
+  {id:'sk10',  em:'💎',name:'COLLECTOR',    desc:'Own 10 skins',         chk:()=>S.skins.length>=10},
+  {id:'z4',    em:'🗺️',name:'ZONE MASTER',  desc:'Reach Zone 4',         chk:()=>(S.ach.mz||0)>=3},
+  {id:'boss',  em:'⚔️',name:'BOSS SLAYER',  desc:'Defeat a boss',        chk:()=>(S.ach.bk||0)>=1},
+  {id:'d1k',   em:'🏃',name:'MARATHON',     desc:'Run 1,000m total',     chk:()=>S.totalDist>=1000},
+  {id:'buy5',  em:'💸',name:'HIGH ROLLER',  desc:'Buy 5 items',          chk:()=>(S.ach.bu||0)>=5},
+];
+const MIS_POOL=[
+  {em:'🏃',name:'LONG HAUL',    desc:'Run 300m in one run',    type:'dist',  target:300,reward:50},
+  {em:'💰',name:'COIN RUSH',    desc:'Collect 20 coins in run',type:'coins', target:20, reward:40},
+  {em:'🏆',name:'HIGH SCORE',   desc:'Score 500 in one run',   type:'score', target:500,reward:60},
+  {em:'🔥',name:'COMBO MASTER', desc:'Get a 5× combo',         type:'combo', target:5,  reward:45},
+  {em:'🦘',name:'BUNNY HOP',    desc:'Jump 30 times in a run', type:'jumps', target:30, reward:35},
+  {em:'🎮',name:'DEDICATED',    desc:'Play 3 runs today',      type:'runs',  target:3,  reward:30},
+  {em:'⚡',name:'POWER HUNGRY', desc:'Collect 5 power-ups',    type:'puC',   target:5,  reward:40},
+  {em:'🗺️',name:'EXPLORER',     desc:'Reach Zone 2',           type:'zone',  target:2,  reward:55},
+];
+const FAKE_LB=[
+  {name:'NightWolf',em:'🐺',score:12840,dist:4280,skin:'demon'},
+  {name:'StarDash', em:'⭐',score:10750,dist:3590,skin:'galaxy'},
+  {name:'PhantomX', em:'👾',score:9620, dist:3210,skin:'void'},
+  {name:'BlazeFury',em:'🔥',score:8500, dist:2840,skin:'phoenix'},
+  {name:'CyberKing',em:'🤖',score:7430, dist:2480,skin:'cyber'},
+  {name:'ShadowLord',em:'🌑',score:6200,dist:2070,skin:'shadow'},
+  {name:'DragonFly',em:'🐉',score:5100, dist:1700,skin:'dragon'},
+  {name:'GalaxyBoy',em:'🌌',score:4240, dist:1415,skin:'galaxy'},
+  {name:'NinjaSwift',em:'🥷',score:3180,dist:1060,skin:'ninja'},
+  {name:'CrystalRun',em:'💎',score:2350,dist:785, skin:'crystal'},
+];
+const ZONES=[
+  {name:'NEON CITY',   spd:6.5, skyA:'#010610',skyB:'#040b18',gnd:'#00f5ff',obs:['#ff2d78','#9900ff','#00aaff']},
+  {name:'LAVA PLAINS', spd:10.5,skyA:'#1a0500',skyB:'#2d0800',gnd:'#ff6600',obs:['#ff2d78','#ffaa00','#ff8800']},
+  {name:'CYBER SPACE', spd:14.5,skyA:'#000820',skyB:'#001040',gnd:'#00ffaa',obs:['#00aaff','#ff00ff','#00ffff']},
+  {name:'SHADOW REALM',spd:18.5,skyA:'#080008',skyB:'#140014',gnd:'#cc00ff',obs:['#ff2d78','#ff8800','#ff0000']},
+];
+
+// ── POWER-UPS ─────────────────────────────────────────────
+const PUS={
+  shield:{on:false,t:0,max:360,i:0,hp:1},magnet:{on:false,t:0,max:420,i:1},
+  boost: {on:false,t:0,max:240,i:2},ghost: {on:false,t:0,max:300,i:3},
+  bomb:  {on:false,t:0,max:1,  i:4},score2:{on:false,t:0,max:380,i:5},
+  fire:  {on:false,t:0,max:280,i:6},ice:   {on:false,t:0,max:300,i:7},
+};
+const PUK=Object.keys(PUS);
+const PU_EM ={shield:'🛡️',magnet:'🧲',boost:'⚡',ghost:'👻',bomb:'💣',score2:'✨',fire:'🔥',ice:'🧊'};
+const PU_COL={shield:'#00aaff',magnet:'#ff44ff',boost:'#ffcc00',ghost:'#ccccff',bomb:'#ff8800',score2:'#00ffaa',fire:'#ff6600',ice:'#aaddff'};
+const PU_LBL={shield:'🛡 SHIELD!',magnet:'🧲 MAGNET!',boost:'⚡ BOOST!',ghost:'👻 GHOST!',bomb:'💣 CLEARED!',score2:'✨ SCORE×2!',fire:'🔥 FIRE!',ice:'🧊 FREEZE!'};
+
+// ── GAME STATE ────────────────────────────────────────────
+let gState='home',gFrame=0,bgF=0;
+let gScore=0,gCoins=0,gDist=0,gSpeed=6.5;
+let gSpawnT=0,gCoinT=0,gPuT=0,gBossT=0;
+let gCombo=1,gMaxCombo=1,gComboT=0;
+let gJumps=0,gRunCoins=0,gRunPU=0,gRunZ=0;
+let gZone=0,gPrevZ=-1,gBossHP=0,gBossOn=false;
+let gReviveUsed=false,gShake=0;
+let PARTS=[],FLOATS=[],BGL=[];
+let GOBS=[],COINS=[],GPUS=[];
+const GND=H-128;
+
+// Player object
+const P={x:82,y:GND,w:44,h:60,vy:0,jumping:false,sliding:false,slideT:0,jumpCount:0,trail:[],legA:0};
+
+// Weather
+let wCur='CLEAR',wTimer=0,wDrops=[],wMeteors=[];
+let bgPts=[];
+let lastFPS=60,fpsCnt=0,fpsT=Date.now();
+
+// Pre-generated city buildings for each layer
+let cityL=[];
+
+// ── HELPERS ───────────────────────────────────────────────
+
+// ── HELPERS ───────────────────────────────────────────────
+const R=(a,b)=>Math.random()*(b-a)+a;
+const RI=(a,b)=>Math.floor(R(a,b+1));
+
+const DAILY_REWARDS = [
+  {em:'💰',amt:20},{em:'💰',amt:35},{em:'💎',amt:50},
+  {em:'💰',amt:30},{em:'💰',amt:75},{em:'💎',amt:100},{em:'👑',amt:300}
+];
+const LP=(a,b,t)=>a+(b-a)*t;
+const sk=()=>SKINS[S.skin];
+function hasBon(b){const s=sk();return s.bonus===b||s.bonus==='all'||s.bonus==='mega'||s.bonus==='crystal';}
+function hit(ax,ay,aw,ah,bx,by,bw,bh){return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;}
+
+// ── SCREEN MANAGEMENT ──────────────────────────────────────
+function showScr(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.add('hide'));
+  document.getElementById('hud').style.display='none';
+  ['h-timer','h-wave'].forEach(i=>{const e=document.getElementById(i);if(e)e.style.display='none';});
+  if(id)document.getElementById(id).classList.remove('hide');
+}
+function goHome(){refreshMissions();updateHome();showScr('s-home');}
+function updateHome(){
+  document.getElementById('home-c').textContent=S.coins.toLocaleString();
+  document.getElementById('home-em').textContent=sk().em;
+  document.getElementById('home-snm').textContent=sk().name;
+  const be=document.getElementById('mc-be');if(be)be.textContent='BEST: '+S.best.toLocaleString();
+  const bt=document.getElementById('mc-bt');if(bt)bt.textContent='BEST: '+S.bestTA.toLocaleString();
+  const bb=document.getElementById('mc-bb');if(bb)bb.textContent='CLEARED: '+(S.ach.brc||0)+'×';
+  updateVIPUI();
+
+  ['h-timer','h-wave'].forEach(i=>{const e=document.getElementById(i);if(e)e.style.display='none';});}
+
+// ── TOAST ──────────────────────────────────────────────────
+function toast(msg,bg='#ffd700'){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.background=bg;t.style.color=bg==='#ffd700'?'#000':'#fff';
+  t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',2200);
+}
+
+// ══════════════════════════════════════════════════════════
+//  ANIMATED MENU BACKGROUND
+// ══════════════════════════════════════════════════════════
+function initBGPts(){
+  bgPts=[];
+  for(let i=0;i<70;i++) bgPts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.38,vy:(Math.random()-.5)*.38,r:Math.random()*1.6+.5,a:Math.random()*Math.PI*2});
+}
+function drawMenuBG(){
+  // Base gradient
+  const grd=BX.createLinearGradient(0,0,0,H);
+  grd.addColorStop(0,'#010612');grd.addColorStop(.55,'#040b1a');grd.addColorStop(1,'#070f24');
+  BX.fillStyle=grd;BX.fillRect(0,0,W,H);
+  // Animated grid
+  BX.strokeStyle='rgba(0,245,255,0.035)';BX.lineWidth=1;
+  const go=(bgF*.28)%44;
+  for(let x=go;x<W;x+=44){BX.beginPath();BX.moveTo(x,0);BX.lineTo(x,H);BX.stroke();}
+  for(let y=go;y<H;y+=44){BX.beginPath();BX.moveTo(0,y);BX.lineTo(W,y);BX.stroke();}
+  // Nebula blobs
+  [[W*.3,H*.3,160,'#00f5ff'],[W*.7,H*.55,130,'#ff2d78'],[W*.5,H*.7,110,'#b44fff']].forEach(([cx,cy,cr,col],bi)=>{
+    const ox=Math.sin(bgF*.005+bi*1.2)*25,oy=Math.cos(bgF*.005+bi*1.4)*18;
+    const g=BX.createRadialGradient(cx+ox,cy+oy,0,cx,cy,cr);
+    g.addColorStop(0,col+'09');g.addColorStop(1,'transparent');
+    BX.fillStyle=g;BX.fillRect(0,0,W,H);
+  });
+  // Floating particles + connections
+  bgPts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;});
+  for(let i=0;i<bgPts.length;i++){
+    const p=bgPts[i];const al=.1+.3*Math.sin(bgF*.02+p.a);
+    BX.globalAlpha=al;BX.fillStyle='#00f5ff';BX.beginPath();BX.arc(p.x,p.y,p.r,0,Math.PI*2);BX.fill();
+    for(let j=i+1;j<bgPts.length;j++){
+      const q=bgPts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<75){BX.strokeStyle=`rgba(0,245,255,${.04*(1-d/75)})`;BX.lineWidth=.8;BX.beginPath();BX.moveTo(p.x,p.y);BX.lineTo(q.x,q.y);BX.stroke();}
+    }
+  }
+  BX.globalAlpha=1;
+  bgF++;
+}
+
+// ══════════════════════════════════════════════════════════
+//  GAME BACKGROUND — MULTI-LAYER CITY
+// ══════════════════════════════════════════════════════════
+function initCityLayers(){
+  cityL=[];
+  // 4 parallax layers of buildings
+  const layerDefs=[
+    {speed:.2, minH:60, maxH:120,minW:18,maxW:40,alpha:.35,winAlpha:.15},
+    {speed:.45,minH:80, maxH:160,minW:24,maxW:55,alpha:.5, winAlpha:.22},
+    {speed:.8, minH:100,maxH:200,minW:30,maxW:70,alpha:.65,winAlpha:.3},
+    {speed:1.2,minH:120,maxH:240,minW:35,maxW:80,alpha:.8, winAlpha:.4},
+  ];
+  layerDefs.forEach(def=>{
+    const buildings=[];
+    for(let x=0;x<W+800;x+=R(def.minW,def.maxW)+4){
+      const bw=R(def.minW,def.maxW),bh=R(def.minH,def.maxH);
+      const windows=[];
+      for(let wy=6;wy<bh-8;wy+=10) for(let wx=4;wx<bw-4;wx+=8)
+        windows.push({rx:wx,ry:wy,lit:Math.random()>.4,blinkRate:R(.005,.02),blinkPhase:Math.random()*Math.PI*2});
+      const neonColor=['#00f5ff','#ff2d78','#ffd700','#ff8c00','#b44fff'][RI(0,4)];
+      buildings.push({x,w:bw,h:bh,alpha:def.alpha,winAlpha:def.winAlpha,windows,neon:neonColor,hasSign:Math.random()>.7,signW:R(8,20)});
+    }
+    cityL.push({speed:def.speed,buildings});
+  });
+}
+
+function drawGameBackground(){
+  const z=ZONES[Math.min(gZone,ZONES.length-1)];
+  // Sky gradient
+  const sky=X.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,z.skyA);sky.addColorStop(.55,z.skyB);sky.addColorStop(1,'#080e20');
+  X.fillStyle=sky;X.fillRect(0,0,W,H);
+
+  // Aurora borealis
+  X.save();
+  const aColors=[['#00ff88','#00aaff'],['#aa00ff','#ff0088'],['#ffaa00','#00ffff']];
+  const aSet=aColors[gZone%3];
+  for(let bi=0;bi<2;bi++){
+    X.beginPath();
+    for(let ax=0;ax<=W;ax+=6){
+      const ay=50+bi*50+Math.sin(ax*.013+gFrame*.009+bi*1.8)*32+Math.sin(ax*.027+gFrame*.006)*14;
+      ax===0?X.moveTo(ax,ay):X.lineTo(ax,ay);
+    }
+    X.strokeStyle=aSet[bi];X.lineWidth=18+bi*12;X.globalAlpha=.045+.015*Math.sin(gFrame*.02+bi);X.stroke();
+  }
+  X.globalAlpha=1;X.restore();
+
+  // Stars with twinkling
+  X.save();
+  for(let i=0;i<90;i++){
+    const sx=((i*137.5+gFrame*.03)%W),sy=(i*53.9)%(H*.5);
+    X.globalAlpha=.1+.38*Math.abs(Math.sin(gFrame*.016+i*.8));
+    X.fillStyle='#fff';X.fillRect(sx,sy,1.5,1.5);
+  }
+  X.globalAlpha=1;X.restore();
+
+  // Moon/planet
+  const moonX=W*.78,moonY=H*.1;
+  const moonG=X.createRadialGradient(moonX-8,moonY-8,2,moonX,moonY,28);
+  moonG.addColorStop(0,'rgba(255,240,200,.7)');moonG.addColorStop(.7,'rgba(220,200,160,.3)');moonG.addColorStop(1,'transparent');
+  X.fillStyle=moonG;X.beginPath();X.arc(moonX,moonY,28,0,Math.PI*2);X.fill();
+  // crater details
+  X.globalAlpha=.15;X.fillStyle='rgba(0,0,0,.5)';
+  [[moonX-6,moonY-4,5],[moonX+8,moonY+6,3],[moonX-2,moonY+9,4]].forEach(([cx,cy,cr])=>{X.beginPath();X.arc(cx,cy,cr,0,Math.PI*2);X.fill();});
+  X.globalAlpha=1;
+
+  // Flying vehicles (rare, zone 2+)
+  if(gZone>=2&&gFrame%300<90){
+    const vx=((gFrame%300)*3+W*.2)%W;
+    X.save();X.translate(vx,H*.15);
+    X.fillStyle=z.gnd+'88';X.fillRect(-20,-3,40,6);
+    X.fillStyle=z.gnd;X.fillRect(-12,-5,24,3);
+    X.shadowColor=z.gnd;X.shadowBlur=12;
+    X.fillStyle=z.gnd+'cc';X.fillRect(18,-2,8,4);X.fillRect(-26,-2,8,4);// thrusters
+    X.shadowBlur=0;X.restore();
+  }
+
+  // City layers parallax
+  cityL.forEach((layer,li)=>{
+    layer.buildings.forEach(b=>{
+      b.x-=layer.speed*(gSpeed/6.5);
+      if(b.x<-b.w-100)b.x+=W+800;
+      const by=GND-b.h;
+      // Building fill
+      const bgrad=X.createLinearGradient(b.x,by,b.x+b.w,by+b.h);
+      bgrad.addColorStop(0,`rgba(10,20,40,${b.alpha})`);
+      bgrad.addColorStop(1,`rgba(5,10,20,${b.alpha*.7})`);
+      X.fillStyle=bgrad;X.fillRect(b.x,by,b.w,b.h);
+      // Building outline
+      X.strokeStyle=z.gnd+Math.floor(b.alpha*50).toString(16).padStart(2,'0');
+      X.lineWidth=1;X.strokeRect(b.x,by,b.w,b.h);
+      // Windows
+      b.windows.forEach(win=>{
+        const blink=win.lit?(.4+.35*Math.sin(gFrame*win.blinkRate+win.blinkPhase)):0;
+        if(blink>.05){
+          X.fillStyle=`rgba(255,255,160,${b.winAlpha*blink})`;
+          X.fillRect(b.x+win.rx,by+win.ry,5,4);
+        }
+      });
+      // Neon sign on roof (larger buildings)
+      if(b.hasSign&&b.h>120){
+        X.shadowColor=b.neon;X.shadowBlur=8+4*Math.sin(gFrame*.04+li);
+        X.strokeStyle=b.neon;X.lineWidth=2;
+        X.strokeRect(b.x+(b.w-b.signW)/2,by-6,b.signW,4);
+        X.shadowBlur=0;
+      }
+      // Rooftop antenna (tall buildings)
+      if(b.h>160){
+        X.strokeStyle='rgba(255,255,255,.2)';X.lineWidth=1;
+        X.beginPath();X.moveTo(b.x+b.w/2,by);X.lineTo(b.x+b.w/2,by-12);X.stroke();
+        X.fillStyle=`rgba(255,0,0,${.6*Math.sin(gFrame*.05)*Math.sin(gFrame*.05)})`;
+        X.beginPath();X.arc(b.x+b.w/2,by-12,2,0,Math.PI*2);X.fill();
+      }
+    });
+  });
+
+  // ── GROUND ────────────────────────────────────────────
+  // Ground fade
+  const gg=X.createLinearGradient(0,GND,0,H);
+  gg.addColorStop(0,z.gnd+'20');gg.addColorStop(.4,z.gnd+'08');gg.addColorStop(1,'rgba(0,0,10,1)');
+  X.fillStyle=gg;X.fillRect(0,GND,W,H-GND);
+
+  // Reflective floor tiles
+  X.save();
+  const tileOff=(gFrame*gSpeed*.4)%52;
+  for(let tx=tileOff-52;tx<W+52;tx+=52){
+    X.fillStyle=`rgba(0,245,255,0.025)`;
+    X.fillRect(tx,GND+2,50,H-GND-4);
+    X.strokeStyle=z.gnd+'18';X.lineWidth=1;
+    X.beginPath();X.moveTo(tx,GND);X.lineTo(tx,H);X.stroke();
+  }
+  X.restore();
+
+  // Ground glowing edge line
+  X.shadowColor=z.gnd;X.shadowBlur=22;
+  X.strokeStyle=z.gnd;X.lineWidth=3;
+  X.beginPath();X.moveTo(0,GND);X.lineTo(W,GND);X.stroke();
+  X.shadowBlur=0;
+
+  // Perspective grid on ground
+  X.strokeStyle=z.gnd+'10';X.lineWidth=1;
+  for(let gx=(gFrame*gSpeed*.42)%52;gx<W;gx+=52){
+    X.beginPath();X.moveTo(gx,GND);X.lineTo(gx-38,H);X.stroke();
+  }
+
+  // Danger vignette
+  if(gSpeed>17){
+    const v=X.createRadialGradient(W/2,H/2,H*.26,W/2,H/2,H*.72);
+    v.addColorStop(0,'transparent');v.addColorStop(1,`rgba(255,0,50,${(gSpeed-17)/9*.28})`);
+    X.fillStyle=v;X.fillRect(0,0,W,H);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  OBSTACLE RENDERING — 8 UNIQUE TYPES
+// ══════════════════════════════════════════════════════════
+function drawObstacle(o){
+  const t=gFrame,z=ZONES[Math.min(gZone,ZONES.length-1)];
+  const col=o.color||z.obs[0];
+  const glo=o.glow||col;
+  X.save();
+  switch(o.type){
+    case 'spike': drawSpike(o,col,glo,t); break;
+    case 'saw':   drawSaw(o,col,glo,t);   break;
+    case 'laser': drawLaser(o,col,glo,t); break;
+    case 'wall':  drawWall(o,col,glo,t);  break;
+    case 'crystal': drawCrystal(o,col,glo,t); break;
+    case 'gate':  drawGate(o,col,glo,t);  break;
+    case 'mine':  drawMine(o,col,glo,t);  break;
+    case 'barrier': drawBarrier(o,col,glo,t); break;
+    default:      drawWall(o,col,glo,t);
+  }
+  X.restore();
+}
+
+function drawSpike(o,col,glo,t){
+  const count=Math.max(2,Math.floor(o.w/20));
+  const sw=o.w/count;
+  X.shadowColor=glo;X.shadowBlur=12+4*Math.sin(t*.09);
+  for(let i=0;i<count;i++){
+    const cx=o.x+i*sw+sw/2;
+    const hPulse=o.h+3*Math.sin(t*.1+i*.8);
+    // Spike body
+    const sg=X.createLinearGradient(cx,o.y,cx,o.y+hPulse);
+    sg.addColorStop(0,col);sg.addColorStop(1,col+'44');
+    X.fillStyle=sg;
+    X.beginPath();X.moveTo(cx,o.y);X.lineTo(cx-sw/2+2,o.y+hPulse);X.lineTo(cx+sw/2-2,o.y+hPulse);X.closePath();X.fill();
+    // Highlight
+    X.fillStyle='rgba(255,255,255,0.35)';
+    X.beginPath();X.moveTo(cx,o.y);X.lineTo(cx-3,o.y+hPulse*.35);X.lineTo(cx+1,o.y+hPulse*.35);X.closePath();X.fill();
+    // Base platform
+    X.fillStyle=col+'88';X.fillRect(o.x,o.y+hPulse-4,o.w,4);
+  }
+  X.shadowBlur=0;
+}
+
+function drawSaw(o,col,glo,t){
+  const cx=o.x,cy=o.y,r=o.r||24;
+  X.save();X.translate(cx,cy);X.rotate(t*.07*(o.spin||1));
+  X.shadowColor=glo;X.shadowBlur=20;
+  const teeth=10;
+  // Outer teeth
+  X.fillStyle=col;
+  for(let i=0;i<teeth;i++){
+    const a=(i/teeth)*Math.PI*2,a2=((i+.5)/teeth)*Math.PI*2;
+    X.beginPath();X.moveTo(Math.cos(a)*r*.7,Math.sin(a)*r*.7);
+    X.lineTo(Math.cos(a2)*r*1.15,Math.sin(a2)*r*1.15);
+    X.lineTo(Math.cos((i+1)/teeth*Math.PI*2)*r*.7,Math.sin((i+1)/teeth*Math.PI*2)*r*.7);
+    X.closePath();X.fill();
+  }
+  // Inner disc
+  const dg=X.createRadialGradient(0,0,0,0,0,r*.7);
+  dg.addColorStop(0,col+'ff');dg.addColorStop(.5,col+'cc');dg.addColorStop(1,col+'44');
+  X.fillStyle=dg;X.beginPath();X.arc(0,0,r*.7,0,Math.PI*2);X.fill();
+  // Center hole
+  X.fillStyle='rgba(0,0,0,.6)';X.beginPath();X.arc(0,0,r*.22,0,Math.PI*2);X.fill();
+  // Bolts
+  for(let i=0;i<4;i++){const ba=i*Math.PI*.5;X.fillStyle='rgba(255,255,255,.5)';X.beginPath();X.arc(Math.cos(ba)*r*.42,Math.sin(ba)*r*.42,3,0,Math.PI*2);X.fill();}
+  X.shadowBlur=0;X.restore();
+}
+
+function drawLaser(o,col,glo,t){
+  const pulse=.6+.4*Math.sin(t*.18);
+  const lh=5*pulse;
+  // Emitter boxes
+  X.shadowColor=glo;X.shadowBlur=14;
+  const eg=X.createLinearGradient(o.x,o.y-10,o.x+16,o.y+10);
+  eg.addColorStop(0,col+'ff');eg.addColorStop(1,col+'88');
+  X.fillStyle=eg;
+  X.beginPath();if(X.roundRect)X.roundRect(o.x,o.y-10,16,20,4);else X.rect(o.x,o.y-10,16,20);X.fill();
+  X.fillStyle=eg;
+  X.beginPath();if(X.roundRect)X.roundRect(o.x+o.w-16,o.y-10,16,20,4);else X.rect(o.x+o.w-16,o.y-10,16,20);X.fill();
+  // Emitter aperture glow
+  X.fillStyle=col;X.beginPath();X.arc(o.x+16,o.y,5,0,Math.PI*2);X.fill();
+  X.fillStyle=col;X.beginPath();X.arc(o.x+o.w-16,o.y,5,0,Math.PI*2);X.fill();
+  // Outer glow beam
+  X.globalAlpha=.15*pulse;X.fillStyle=col;X.fillRect(o.x+16,o.y-12,o.w-32,24);
+  // Core beam
+  X.globalAlpha=1;
+  const lg=X.createLinearGradient(o.x+16,0,o.x+o.w-16,0);
+  lg.addColorStop(0,col+'ff');lg.addColorStop(.5,'#fff');lg.addColorStop(1,col+'ff');
+  X.fillStyle=lg;X.fillRect(o.x+16,o.y-lh,o.w-32,lh*2);
+  // Flicker sparks
+  if(Math.random()>.7){X.fillStyle='rgba(255,255,255,.9)';X.fillRect(o.x+R(20,o.w-20),o.y-lh-2,2,4);}
+  X.shadowBlur=0;
+}
+
+function drawWall(o,col,glo,t){
+  // Multi-layer neon wall
+  const wg=X.createLinearGradient(o.x,o.y,o.x+o.w,o.y+o.h);
+  wg.addColorStop(0,col+'cc');wg.addColorStop(.5,col+'ff');wg.addColorStop(1,col+'88');
+  X.shadowColor=glo;X.shadowBlur=14+5*Math.sin(t*.08);
+  X.fillStyle=wg;X.fillRect(o.x,o.y,o.w,o.h);
+  // Top highlight
+  X.fillStyle='rgba(255,255,255,.2)';X.fillRect(o.x,o.y,o.w,3);
+  // Side highlight
+  X.fillStyle='rgba(255,255,255,.12)';X.fillRect(o.x,o.y,3,o.h);
+  // Inner outline
+  X.strokeStyle='rgba(255,255,255,.22)';X.lineWidth=1;X.strokeRect(o.x+2,o.y+2,o.w-4,o.h-4);
+  // Horizontal scan lines
+  X.strokeStyle=col+'44';X.lineWidth=1;
+  for(let ly=o.y+8;ly<o.y+o.h-4;ly+=10){X.beginPath();X.moveTo(o.x+2,ly);X.lineTo(o.x+o.w-2,ly);X.stroke();}
+  // Warning triangles at danger speed
+  if(gSpeed>15){
+    X.globalAlpha=.3+.2*Math.sin(t*.2);X.fillStyle='#fff';
+    X.font='bold 10px Arial';X.textAlign='center';X.fillText('!',o.x+o.w/2,o.y+o.h/2+4);X.textAlign='left';X.globalAlpha=1;
+  }
+  X.shadowBlur=0;
+}
+
+function drawCrystal(o,col,glo,t){
+  const cx=o.x+o.w/2;
+  X.shadowColor=glo;X.shadowBlur=16+6*Math.sin(t*.07);
+  // Multiple crystal spires
+  const spires=Math.max(1,Math.floor(o.w/18));
+  for(let i=0;i<spires;i++){
+    const sx=o.x+i*(o.w/spires)+o.w/spires/2;
+    const sh=o.h*(i%2===0?1:.72);
+    const sw2=o.w/spires*.45;
+    // Crystal facets
+    const cg=X.createLinearGradient(sx-sw2,o.y,sx+sw2,o.y+sh);
+    cg.addColorStop(0,'#fff');cg.addColorStop(.25,col);cg.addColorStop(1,col+'55');
+    X.fillStyle=cg;
+    X.beginPath();X.moveTo(sx,o.y);X.lineTo(sx+sw2,o.y+sh*.35);X.lineTo(sx+sw2*.6,o.y+sh);X.lineTo(sx-sw2*.6,o.y+sh);X.lineTo(sx-sw2,o.y+sh*.35);X.closePath();X.fill();
+    // Inner highlight
+    X.fillStyle='rgba(255,255,255,.4)';
+    X.beginPath();X.moveTo(sx,o.y);X.lineTo(sx-2,o.y+sh*.2);X.lineTo(sx+3,o.y+sh*.2);X.closePath();X.fill();
+    // Base
+    X.fillStyle=col+'66';X.fillRect(o.x+2,o.y+o.h-4,o.w-4,4);
+  }
+  X.shadowBlur=0;
+}
+
+function drawGate(o,col,glo,t){
+  const pulse=.7+.3*Math.sin(t*.12);
+  X.shadowColor=glo;X.shadowBlur=20*pulse;
+  // Two vertical pillars
+  const pw=12;
+  // Left pillar
+  const lpg=X.createLinearGradient(o.x,o.y,o.x+pw,o.y+o.h);
+  lpg.addColorStop(0,col);lpg.addColorStop(.5,'#fff');lpg.addColorStop(1,col);
+  X.fillStyle=lpg;X.fillRect(o.x,o.y,pw,o.h);
+  // Right pillar
+  X.fillStyle=lpg;X.fillRect(o.x+o.w-pw,o.y,pw,o.h);
+  // Energy curtain between pillars
+  X.globalAlpha=.35*pulse;
+  const ecg=X.createLinearGradient(o.x+pw,o.y,o.x+o.w-pw,o.y);
+  ecg.addColorStop(0,col+'ff');ecg.addColorStop(.5,'rgba(255,255,255,.1)');ecg.addColorStop(1,col+'ff');
+  X.fillStyle=ecg;X.fillRect(o.x+pw,o.y,o.w-pw*2,o.h);
+  // Horizontal energy arcs
+  X.globalAlpha=.7;X.strokeStyle=col;X.lineWidth=2;
+  for(let ay=o.y+8;ay<o.y+o.h;ay+=14){
+    X.beginPath();
+    for(let ax=o.x+pw;ax<=o.x+o.w-pw;ax+=6){
+      const ay2=ay+Math.sin((ax-o.x)*0.2+t*.15)*4*pulse;
+      ax===o.x+pw?X.moveTo(ax,ay2):X.lineTo(ax,ay2);
+    }
+    X.stroke();
+  }
+  // Cap pieces
+  X.globalAlpha=1;X.fillStyle=col;
+  X.fillRect(o.x,o.y,o.w,6);X.fillRect(o.x,o.y+o.h-6,o.w,6);
+  X.shadowBlur=0;
+}
+
+function drawMine(o,col,glo,t){
+  const cx=o.x,cy=o.y,r=o.r||18;
+  const bob=Math.sin(t*.06)*6;// bobbing
+  X.save();X.translate(cx,cy+bob);
+  X.shadowColor=glo;X.shadowBlur=18+6*Math.sin(t*.1);
+  // Outer glow ring
+  X.strokeStyle=col+'44';X.lineWidth=8;X.beginPath();X.arc(0,0,r+5,0,Math.PI*2);X.stroke();
+  // Body
+  const mg=X.createRadialGradient(-r*.3,-r*.3,0,0,0,r);
+  mg.addColorStop(0,col+'ff');mg.addColorStop(.5,col+'cc');mg.addColorStop(1,col+'55');
+  X.fillStyle=mg;X.beginPath();X.arc(0,0,r,0,Math.PI*2);X.fill();
+  // Spikes/prongs
+  const spk=8;
+  X.fillStyle=col;
+  for(let i=0;i<spk;i++){
+    X.save();X.rotate((i/spk)*Math.PI*2+(t*.02));
+    X.beginPath();X.moveTo(0,-r);X.lineTo(-3,-r-9);X.lineTo(3,-r-9);X.closePath();X.fill();X.restore();
+  }
+  // Center iris
+  X.fillStyle='rgba(0,0,0,.7)';X.beginPath();X.arc(0,0,r*.38,0,Math.PI*2);X.fill();
+  X.fillStyle=col;X.beginPath();X.arc(0,0,r*.18,0,Math.PI*2);X.fill();
+  // Chain
+  X.strokeStyle='rgba(255,255,255,.2)';X.lineWidth=2;X.setLineDash([3,3]);
+  X.beginPath();X.moveTo(0,r);X.lineTo(0,r+20);X.stroke();X.setLineDash([]);
+  X.shadowBlur=0;X.restore();
+}
+
+function drawBarrier(o,col,glo,t){
+  const pulse=.5+.5*Math.abs(Math.sin(t*.1));
+  X.shadowColor=glo;X.shadowBlur=22*pulse;
+  // Outer frame
+  X.strokeStyle=col;X.lineWidth=3;X.strokeRect(o.x,o.y,o.w,o.h);
+  // Inner glowing fill
+  const bg2=X.createLinearGradient(o.x,o.y,o.x,o.y+o.h);
+  bg2.addColorStop(0,col+'33');bg2.addColorStop(.5,col+'11');bg2.addColorStop(1,col+'33');
+  X.fillStyle=bg2;X.fillRect(o.x+2,o.y+2,o.w-4,o.h-4);
+  // Animated diagonal lines
+  X.save();X.rect(o.x,o.y,o.w,o.h);X.clip();
+  X.strokeStyle=col+'44';X.lineWidth=2;
+  const off=(t*2)%20;
+  for(let d=-o.h;d<o.w+o.h;d+=20){
+    X.beginPath();X.moveTo(o.x+d+off,o.y);X.lineTo(o.x+d+off-o.h,o.y+o.h);X.stroke();
+  }
+  X.restore();
+  // Corner decorations
+  const cs=10;const corners=[[o.x,o.y],[o.x+o.w-cs,o.y],[o.x,o.y+o.h-cs],[o.x+o.w-cs,o.y+o.h-cs]];
+  corners.forEach(([cx,cy])=>{X.fillStyle=col;X.fillRect(cx,cy,cs,cs);});
+  // Center icon
+  X.fillStyle=col+'cc';X.font='bold 14px Arial';X.textAlign='center';X.textBaseline='middle';
+  X.fillText('✕',o.x+o.w/2,o.y+o.h/2);X.textAlign='left';
+  X.shadowBlur=0;
+}
+
+// ══════════════════════════════════════════════════════════
+//  CHARACTER RENDERING — Humanoid with Animation
+// ══════════════════════════════════════════════════════════
+function drawLimb(cx2,cy2,w2,h2,angle,col,glo){
+  X.save();X.translate(cx2,cy2);X.rotate(angle);
+  X.shadowColor=glo;X.shadowBlur=8;
+  const lg=X.createLinearGradient(0,0,w2,h2);
+  lg.addColorStop(0,col+'ee');lg.addColorStop(1,col+'88');
+  X.fillStyle=lg;
+  X.beginPath();if(X.roundRect)X.roundRect(-w2/2,0,w2,h2,3);else X.rect(-w2/2,0,w2,h2);X.fill();
+  // Joint circle at top
+  X.fillStyle=glo+'bb';X.shadowBlur=0;X.beginPath();X.arc(0,0,w2/2+1,0,Math.PI*2);X.fill();
+  X.restore();
+}
+
+function drawCharacter(){
+  if(typeof drawMonarchSkin==='function'&&gMonarch&&gMonarch.level>=1){if(drawMonarchSkin(P))return;}
+  if(gState==='dead'&&gFrame%5>=3)return;
+  const s=sk();
+  const isSlide=P.sliding,isJump=P.jumping;
+  const ph=isSlide?P.h*.44:P.h;
+  const py2=isSlide?P.y+P.h*.56:P.y;
+  const cx2=P.x+P.w/2;
+  const animT=gFrame*.22;
+  const legSwing=isJump?.25:isSlide?0:Math.sin(animT)*.42;
+  const armSwing=isJump?-.38:isSlide?.5:Math.sin(animT+Math.PI)*.32;
+
+  X.save();
+
+  // ── TRAIL ──
+  if(S.settings.trails){
+    P.trail.forEach((tp,i)=>{
+      X.globalAlpha=tp.life*.48;
+      X.shadowColor=s.tr;X.shadowBlur=6;
+      X.fillStyle=s.tr;
+      X.beginPath();X.arc(tp.x,tp.y,LP(1.5,8,i/P.trail.length),0,Math.PI*2);X.fill();
+      X.shadowBlur=0;
+    });
+    X.globalAlpha=1;
+  }
+
+  // ── SKIN-SPECIFIC AURA ──
+  if(s.bonus==='ghost'&&PUS.ghost.on||hasBon('ghost')){
+    X.globalAlpha=.22;X.fillStyle=s.c;
+    X.beginPath();X.ellipse(cx2,py2+ph/2,P.w*.9,ph*.6,0,0,Math.PI*2);X.fill();
+    X.globalAlpha=1;
+  }
+
+  // ── POWER-UP RINGS ──
+  const rings=[
+    PUS.shield.on&&{c:'#00aaff',sp:.1, r:36,dash:false,lw:2.5},
+    PUS.score2.on&&{c:'#00ffaa',sp:.14,r:31,dash:true, lw:2},
+    PUS.ice.on   &&{c:'#aaddff',sp:.08,r:40,dash:false,lw:2},
+    PUS.fire.on  &&{c:'#ff6600',sp:.12,r:34,dash:false,lw:3},
+  ].filter(Boolean);
+  rings.forEach(ring=>{
+    X.strokeStyle=ring.c;X.lineWidth=ring.lw;X.shadowColor=ring.c;X.shadowBlur=18;
+    if(ring.dash)X.setLineDash([4,4]);
+    X.beginPath();X.arc(cx2,py2+ph/2,ring.r+3*Math.sin(gFrame*ring.sp),0,Math.PI*2);X.stroke();
+    X.setLineDash([]);X.shadowBlur=0;
+  });
+
+  if(PUS.ghost.on)X.globalAlpha=.52;
+
+  // ── LEGS (behind body) ──
+  if(!isSlide){
+    drawLimb(cx2-9,py2+ph*.64,8,22,legSwing,s.c,s.g);
+    drawLimb(cx2+9,py2+ph*.64,8,22,-legSwing,s.c,s.g);
+    // Feet
+    const f1y=py2+ph*.64+22+8*Math.sin(animT);
+    const f2y=py2+ph*.64+22+8*Math.sin(animT+Math.PI);
+    X.shadowColor=s.g;X.shadowBlur=6;
+    X.fillStyle=s.c+'cc';
+    X.beginPath();if(X.roundRect)X.roundRect(cx2-15,f1y-3,14,6,2);else X.rect(cx2-15,f1y-3,14,6);X.fill();
+    X.beginPath();if(X.roundRect)X.roundRect(cx2+1,f2y-3,14,6,2);else X.rect(cx2+1,f2y-3,14,6);X.fill();
+    X.shadowBlur=0;
+  }
+
+  // ── TORSO ──
+  const bodyY=isSlide?py2:py2+ph*.28;
+  const bodyH=isSlide?ph:ph*.5;
+  X.shadowColor=s.g;X.shadowBlur=24;
+  const bg3=X.createLinearGradient(P.x,bodyY,P.x+P.w,bodyY+bodyH);
+  bg3.addColorStop(0,s.c+'ff');bg3.addColorStop(.45,s.c+'ee');bg3.addColorStop(1,s.g+'99');
+  X.fillStyle=bg3;
+  X.beginPath();if(X.roundRect)X.roundRect(P.x+2,bodyY,P.w-4,bodyH,7);else X.rect(P.x+2,bodyY,P.w-4,bodyH);X.fill();
+  X.shadowBlur=0;
+  // Armor stripe
+  X.strokeStyle='rgba(255,255,255,.18)';X.lineWidth=1;
+  X.beginPath();X.moveTo(P.x+5,bodyY+bodyH*.38);X.lineTo(P.x+P.w-5,bodyY+bodyH*.38);X.stroke();
+  // Vertical lines
+  X.beginPath();X.moveTo(cx2-7,bodyY+4);X.lineTo(cx2-7,bodyY+bodyH-4);X.stroke();
+  X.beginPath();X.moveTo(cx2+7,bodyY+4);X.lineTo(cx2+7,bodyY+bodyH-4);X.stroke();
+  // Center power gem
+  X.shadowColor=s.g;X.shadowBlur=12;
+  const gemG=X.createRadialGradient(cx2,bodyY+bodyH*.2,0,cx2,bodyY+bodyH*.2,6);
+  gemG.addColorStop(0,'#fff');gemG.addColorStop(.5,s.g);gemG.addColorStop(1,s.c+'00');
+  X.fillStyle=gemG;X.beginPath();X.arc(cx2,bodyY+bodyH*.2,6,0,Math.PI*2);X.fill();
+  X.shadowBlur=0;
+
+  if(!isSlide){
+    // ── ARMS ──
+    drawLimb(P.x-2,py2+ph*.32,7,17,armSwing,s.c,s.g);
+    drawLimb(P.x+P.w-5,py2+ph*.32,7,17,-armSwing,s.c,s.g);
+
+    // ── HEAD ──
+    const headH=ph*.3;
+    X.shadowColor=s.g;X.shadowBlur=20;
+    const hg=X.createLinearGradient(P.x+4,py2,P.x+P.w-4,py2+headH);
+    hg.addColorStop(0,s.c);hg.addColorStop(.6,s.c+'dd');hg.addColorStop(1,s.g);
+    X.fillStyle=hg;
+    X.beginPath();if(X.roundRect)X.roundRect(P.x+4,py2,P.w-8,headH,9);else X.rect(P.x+4,py2,P.w-8,headH);X.fill();
+    X.shadowBlur=0;
+    // Helmet ridge/top
+    X.fillStyle=s.c;X.shadowColor=s.g;X.shadowBlur=8;
+    X.fillRect(cx2-3,py2-4,6,6);
+    // Ear pieces
+    X.fillStyle=s.c+'cc';X.fillRect(P.x+1,py2+4,4,headH-8);X.fillRect(P.x+P.w-5,py2+4,4,headH-8);
+    X.shadowBlur=0;
+    // Visor
+    X.fillStyle='rgba(255,255,255,.88)';
+    X.beginPath();if(X.roundRect)X.roundRect(P.x+8,py2+5,P.w-16,12,4);else X.rect(P.x+8,py2+5,P.w-16,12);X.fill();
+    // Visor tint
+    X.fillStyle=s.c+'28';
+    X.beginPath();if(X.roundRect)X.roundRect(P.x+8,py2+5,P.w-16,12,4);else X.rect(P.x+8,py2+5,P.w-16,12);X.fill();
+    // Visor shine strip
+    X.fillStyle='rgba(255,255,255,.65)';
+    X.beginPath();if(X.roundRect)X.roundRect(P.x+8,py2+5,(P.w-16)*.38,5,2);else X.rect(P.x+8,py2+5,(P.w-16)*.38,5);X.fill();
+    // Eye glow
+    X.shadowColor=s.g;X.shadowBlur=10;X.fillStyle=s.g;
+    X.beginPath();X.arc(cx2-6,py2+11,2.5,0,Math.PI*2);X.fill();
+    X.beginPath();X.arc(cx2+6,py2+11,2.5,0,Math.PI*2);X.fill();
+    X.shadowBlur=0;
+
+    // Skin-specific head effect
+    if(s.bonus==='flame'||hasBon('mega')){
+      for(let fi=0;fi<3;fi++){
+        const fx=cx2+R(-8,8);const fy=py2-R(0,12);
+        X.globalAlpha=R(.3,.7);X.fillStyle='#ff8800';
+        X.beginPath();X.arc(fx,fy,R(2,5),0,Math.PI*2);X.fill();
+        X.globalAlpha=1;
+      }
+    }
+    if(s.bonus==='startice'||s.bonus==='ice'){
+      X.strokeStyle='#aaffff88';X.lineWidth=1;
+      for(let ci=0;ci<4;ci++){const ca=ci*Math.PI*.5;X.beginPath();X.moveTo(cx2,py2-8);X.lineTo(cx2+Math.cos(ca)*12,py2-8+Math.sin(ca)*12);X.stroke();}
+    }
+  }
+
+  X.globalAlpha=1;
+  X.restore();
+}
+
+// ══════════════════════════════════════════════════════════
+//  PARTICLES
+// ══════════════════════════════════════════════════════════
+function burst(x,y,color,n=12){
+  if(!S.settings.particles)return;
+  for(let i=0;i<n;i++)
