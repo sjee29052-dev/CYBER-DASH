@@ -9,6 +9,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>SHADOW DASH ULTRA</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script>
+  window.onerror = function(message, source, lineno, colno, error) {
+    alert("CRASH ERROR: " + message + " at line " + lineno);
+    return false;
+  };
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
 html,body{touch-action:manipulation;}
