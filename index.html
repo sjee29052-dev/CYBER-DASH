@@ -1,0 +1,2791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>VOID RUNNER: Abyss Protocol - Ultimate Edition (Complete)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+        body { overflow: hidden; background: #050510; font-family: 'Rajdhani', sans-serif; color: #fff; width: 100vw; height: 100vh; position: fixed; }
+        #gameContainer { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .ui-layer > * { pointer-events: auto; }
+        
+        /* Main Menu */
+        #mainMenu { display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(180deg, #0a0a1a 0%, #050510 100%); z-index: 100; }
+        .menu-title { font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 8vw, 4rem); font-weight: 900; color: #0ff; text-shadow: 0 0 20px rgba(0,255,255,0.5), 0 0 40px rgba(0,255,255,0.3); letter-spacing: 0.1em; margin-bottom: 0.5rem; text-align: center; }
+        .menu-subtitle { font-family: 'Share Tech Mono', monospace; font-size: clamp(0.8rem, 3vw, 1.2rem); color: #888; margin-bottom: 2rem; letter-spacing: 0.2em; }
+        .menu-btn { background: rgba(0,255,255,0.1); border: 2px solid #0ff; color: #0ff; padding: 12px 40px; font-family: 'Orbitron', sans-serif; font-size: clamp(0.9rem, 3vw, 1.1rem); cursor: pointer; margin: 8px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.1em; position: relative; overflow: hidden; }
+        .menu-btn:hover { background: rgba(0,255,255,0.2); box-shadow: 0 0 20px rgba(0,255,255,0.3); transform: translateY(-2px); }
+        .menu-btn.premium { border-color: #ffd700; color: #ffd700; background: rgba(255,215,0,0.1); }
+        .menu-btn.premium:hover { background: rgba(255,215,0,0.2); box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+        .menu-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transition: left 0.5s; }
+        .menu-btn:hover::before { left: 100%; }
+        
+        /* HUD */
+        #hud { display: none; padding: 15px; }
+        .hud-bar { background: rgba(0,0,0,0.7); border: 1px solid rgba(0,255,255,0.3); border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; backdrop-filter: blur(10px); }
+        .hud-label { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; color: #0ff; margin-bottom: 4px; }
+        .hud-value { font-family: 'Share Tech Mono', monospace; font-size: 1.1rem; color: #fff; }
+        .health-bar { width: 200px; height: 20px; background: rgba(255,0,0,0.3); border: 1px solid #f00; border-radius: 10px; overflow: hidden; position: relative; }
+        .health-fill { height: 100%; background: linear-gradient(90deg, #f00, #ff6600); transition: width 0.3s; }
+        .energy-bar { width: 150px; height: 15px; background: rgba(0,255,255,0.2); border: 1px solid #0ff; border-radius: 7px; overflow: hidden; }
+        .energy-fill { height: 100%; background: linear-gradient(90deg, #0ff, #00ffff); transition: width 0.3s; }
+        
+        /* Overlays */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(10px); }
+        .overlay.active { display: flex; }
+        .overlay-title { font-family: 'Orbitron', sans-serif; font-size: 2rem; color: #0ff; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(0,255,255,0.5); }
+        .overlay-text { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; color: #888; margin-bottom: 2rem; text-align: center; max-width: 80%; }
+        
+        /* Shop / Inventory */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; padding: 20px; max-width: 800px; width: 100%; }
+        .grid-item { background: rgba(0,255,255,0.05); border: 1px solid rgba(0,255,255,0.2); border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .grid-item:hover { border-color: #0ff; background: rgba(0,255,255,0.1); transform: translateY(-3px); }
+        .grid-item.locked { opacity: 0.4; pointer-events: none; }
+        .grid-item.equipped { border-color: #0f0; box-shadow: 0 0 15px rgba(0,255,0,0.3); }
+        .item-icon { font-size: 2rem; margin-bottom: 8px; }
+        .item-name { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: #fff; margin-bottom: 4px; }
+        .item-cost { font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; color: #ffd700; }
+        .item-rarity-common { border-color: #888; }
+        .item-rarity-uncommon { border-color: #0f0; }
+        .item-rarity-rare { border-color: #0088ff; }
+        .item-rarity-epic { border-color: #a0f; }
+        .item-rarity-legendary { border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+        
+        /* Notifications */
+        #notificationArea { position: absolute; top: 80px; right: 20px; z-index: 60; max-width: 300px; }
+        .notification { background: rgba(0,0,0,0.8); border-left: 3px solid #0ff; padding: 12px 15px; margin-bottom: 8px; border-radius: 0 4px 4px 0; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; animation: slideIn 0.3s ease-out; backdrop-filter: blur(10px); }
+        .notification.legendary { border-left-color: #ffd700; }
+        .notification.epic { border-left-color: #a0f; }
+        .notification.rare { border-left-color: #0088ff; }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        /* Floating Text */
+        .floating-text { position: absolute; font-family: 'Orbitron', sans-serif; font-weight: bold; pointer-events: none; animation: floatUp 1.5s ease-out forwards; text-shadow: 0 0 10px currentColor; z-index: 55; }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
+        
+        /* Combo Display */
+        #comboDisplay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 900; color: #0ff; text-shadow: 0 0 30px rgba(0,255,255,0.8); opacity: 0; transition: opacity 0.3s; z-index: 45; pointer-events: none; }
+        #comboDisplay.show { opacity: 1; }
+        
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(10px); }
+        .modal-box { background: linear-gradient(180deg, #0a0a1a, #050510); border: 2px solid #0ff; border-radius: 12px; padding: 30px; max-width: 90%; max-height: 90vh; overflow-y: auto; position: relative; }
+        .modal-title { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: #0ff; margin-bottom: 15px; text-align: center; }
+        .modal-text { font-family: 'Rajdhani', sans-serif; color: #888; margin-bottom: 20px; text-align: center; }
+        .close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; color: #f00; font-size: 1.5rem; cursor: pointer; font-family: 'Orbitron', sans-serif; }
+        
+        /* Weapon Wheel */
+        #weaponWheel { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%) scale(0); width: 200px; height: 200px; background: rgba(0,0,0,0.9); border: 2px solid #0ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; z-index: 40; }
+        #weaponWheel.active { transform: translateX(-50%) scale(1); }
+        .weapon-slot { position: absolute; width: 50px; height: 50px; background: rgba(0,255,255,0.1); border: 2px solid #0ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.5rem; transition: all 0.3s; }
+        .weapon-slot:hover { background: rgba(0,255,255,0.3); transform: scale(1.1); }
+        .weapon-slot.selected { border-color: #0f0; box-shadow: 0 0 15px rgba(0,255,0,0.5); }
+        
+        /* Quest Tracker */
+        #questLog { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; padding: 12px; max-width: 250px; backdrop-filter: blur(10px); }
+        .quest-item { font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; color: #0ff; margin-bottom: 6px; }
+        .quest-progress { width: 100%; height: 6px; background: rgba(0,255,255,0.2); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .quest-progress-fill { height: 100%; background: linear-gradient(90deg, #0ff, #00ffff); transition: width 0.5s; }
+        
+        /* Minimap */
+        #minimap { position: absolute; bottom: 20px; right: 20px; width: 200px; height: 120px; background: rgba(0,0,0,0.8); border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; overflow: hidden; }
+        
+        /* Damage Numbers */
+        .damage-number { position: absolute; font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 14px; pointer-events: none; animation: damageFloat 1.2s ease-out forwards; z-index: 55; }
+        @keyframes damageFloat { 0% { transform: translateY(0) scale(1); opacity: 1; } 50% { transform: translateY(-30px) scale(1.3); opacity: 0.8; } 100% { transform: translateY(-50px) scale(0.8); opacity: 0; } }
+        
+        /* Achievement Popup */
+        .achievement-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(180deg, #1a1a3a, #0a0a1a); border: 2px solid #ffd700; border-radius: 12px; padding: 20px 40px; font-family: 'Orbitron', sans-serif; color: #ffd700; text-align: center; z-index: 300; animation: achievementIn 0.5s ease-out; box-shadow: 0 0 30px rgba(255,215,0,0.3); }
+        @keyframes achievementIn { from { transform: translateX(-50%) translateY(-100px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        
+        /* Responsive */
+        @media (max-width: 600px) { .menu-title { font-size: 2rem; } .grid-container { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; } .hud-bar { padding: 6px 8px; } .modal-box { padding: 20px; } }
+        @media (max-width: 400px) { .menu-title { font-size: 1.5rem; } .menu-btn { padding: 10px 25px; font-size: 0.8rem; } }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a1a; }
+        ::-webkit-scrollbar-thumb { background: #0ff; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00cccc; }
+        
+        /* Loading Screen */
+        #loadingScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050510; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        .loading-bar { width: 200px; height: 4px; background: rgba(0,255,255,0.2); border-radius: 2px; overflow: hidden; margin-top: 20px; }
+        .loading-fill { height: 100%; background: linear-gradient(90deg, #0ff, #00ffff); animation: loading 2s ease-in-out infinite; }
+        @keyframes loading { 0% { width: 0%; } 50% { width: 100%; } 100% { width: 0%; } }
+        .loading-text { font-family: 'Orbitron', sans-serif; color: #0ff; font-size: 1rem; margin-top: 15px; letter-spacing: 0.2em; }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Loading Screen -->
+        <div id="loadingScreen">
+            <div class="menu-title">VOID RUNNER</div>
+            <div class="loading-bar"><div class="loading-fill"></div></div>
+            <div class="loading-text">INITIALIZING SYSTEMS...</div>
+        </div>
+        
+        <!-- Main Menu -->
+        <div id="mainMenu" class="ui-layer active">
+            <div class="menu-title">VOID RUNNER</div>
+            <div class="menu-subtitle">ABYSS PROTOCOL v3.0.1</div>
+            <button class="menu-btn" onclick="game.startStory()">▶ STORY MODE</button>
+            <button class="menu-btn" onclick="game.startEndless()">∞ ENDLESS MODE</button>
+            <button class="menu-btn" onclick="game.openArmory()">⚔ ARMORY</button>
+            <button class="menu-btn" onclick="game.openSkillTree()">✦ SKILL TREE</button>
+            <button class="menu-btn" onclick="game.openCrafting()">⚒ CRAFTING</button>
+            <button class="menu-btn" onclick="game.openQuests()">📜 QUESTS</button>
+            <button class="menu-btn" onclick="game.openAchievements()">🏆 ACHIEVEMENTS</button>
+            <button class="menu-btn" onclick="game.openLeaderboard()">📊 LEADERBOARD</button>
+            <button class="menu-btn" onclick="game.openGuild()">⚜ GUILD</button>
+            <button class="menu-btn" onclick="game.openTournament()">🏁 TOURNAMENT</button>
+            <button class="menu-btn" onclick="game.openBattlePass()">🎫 BATTLE PASS</button>
+            <button class="menu-btn" onclick="game.openDaily()">🎁 DAILY REWARDS</button>
+            <button class="menu-btn" onclick="game.openSettings()">⚙ SETTINGS</button>
+            <button class="menu-btn premium" onclick="game.showPremium()">👑 PREMIUM</button>
+            <button class="menu-btn" onclick="game.openIAPShop()">💎 SHOP</button>
+            <button class="menu-btn" onclick="game.showAdRewardMenu()">📺 FREE REWARDS</button>
+        </div>
+        
+        <!-- HUD -->
+        <div id="hud" class="ui-layer">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="hud-bar">
+                        <div class="hud-label">HEALTH</div>
+                        <div class="health-bar"><div class="health-fill" id="healthFill" style="width: 100%"></div></div>
+                    </div>
+                    <div class="hud-bar">
+                        <div class="hud-label">ENERGY</div>
+                        <div class="energy-bar"><div class="energy-fill" id="energyFill" style="width: 100%"></div></div>
+                    </div>
+                    <div class="hud-bar">
+                        <div class="hud-label">LEVEL <span id="levelDisplay">1</span></div>
+                        <div class="hud-value" id="scoreDisplay">0</div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="hud-bar">
+                        <div class="hud-label">COINS</div>
+                        <div class="hud-value" style="color: #ffd700" id="coinDisplay">0</div>
+                    </div>
+                    <div class="hud-bar">
+                        <div class="hud-label">GEMS</div>
+                        <div class="hud-value" style="color: #0ff" id="gemDisplay">0</div>
+                    </div>
+                    <div class="hud-bar">
+                        <div class="hud-label">WAVE</div>
+                        <div class="hud-value" id="waveDisplay">1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pause Menu -->
+        <div id="pauseMenu" class="overlay">
+            <div class="overlay-title">PAUSED</div>
+            <div class="overlay-text">The Abyss waits for no one...</div>
+            <button class="menu-btn" onclick="game.resume()">▶ RESUME</button>
+            <button class="menu-btn" onclick="game.restart()">↻ RESTART</button>
+            <button class="menu-btn" onclick="game.openSettings()">⚙ SETTINGS</button>
+            <button class="menu-btn" onclick="game.showMenu()">✕ QUIT</button>
+        </div>
+        
+        <!-- Game Over -->
+        <div id="gameOver" class="overlay">
+            <div class="overlay-title" id="gameOverTitle">SYSTEM FAILURE</div>
+            <div class="overlay-text" id="gameOverText">The void claims another runner...</div>
+            <div style="font-family: 'Orbitron'; color: #ffd700; font-size: 1.5rem; margin-bottom: 20px;" id="finalScore">Score: 0</div>
+            <button class="menu-btn" onclick="game.restart()">↻ TRY AGAIN</button>
+            <button class="menu-btn" onclick="game.showMenu()">📋 MAIN MENU</button>
+            <button class="menu-btn premium" onclick="game.showAdRewardMenu()">📺 FREE CONTINUE</button>
+        </div>
+        
+        <!-- Level Complete -->
+        <div id="levelComplete" class="overlay">
+            <div class="overlay-title" style="color: #0f0">SECTOR CLEARED</div>
+            <div class="overlay-text" id="levelCompleteText">The Abyss recedes... for now.</div>
+            <div style="font-family: 'Orbitron'; color: #ffd700; font-size: 1.2rem; margin-bottom: 10px;" id="levelRewards">Rewards: +100 Coins</div>
+            <button class="menu-btn" onclick="game.nextLevel()">▶ NEXT SECTOR</button>
+            <button class="menu-btn" onclick="game.showMenu()">📋 MAIN MENU</button>
+        </div>
+        
+        <!-- Armory -->
+        <div id="armory" class="overlay">
+            <div class="overlay-title">⚔ ARMORY</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="menu-btn" style="padding: 8px 20px; font-size: 0.8rem;" onclick="game.armoryTab='weapons';game.renderArmory()">WEAPONS</button>
+                <button class="menu-btn" style="padding: 8px 20px; font-size: 0.8rem;" onclick="game.armoryTab='abilities';game.renderArmory()">ABILITIES</button>
+                <button class="menu-btn" style="padding: 8px 20px; font-size: 0.8rem;" onclick="game.armoryTab='artifacts';game.renderArmory()">ARTIFACTS</button>
+                <button class="menu-btn" style="padding: 8px 20px; font-size: 0.8rem;" onclick="game.armoryTab='skins';game.renderArmory()">SKINS</button>
+            </div>
+            <div class="grid-container" id="armoryGrid"></div>
+            <button class="menu-btn" onclick="game.closeArmory()">✕ CLOSE</button>
+        </div>
+        
+        <!-- Skill Tree -->
+        <div id="skillTree" class="overlay">
+            <div class="overlay-title">✦ SKILL TREE</div>
+            <div class="overlay-text">Skill Points: <span id="skillPoints" style="color: #0ff">0</span></div>
+            <canvas id="skillCanvas" width="800" height="500" style="border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; max-width: 100%;"></canvas>
+            <div style="margin-top: 15px; color: #888; font-size: 0.9rem;" id="skillDesc">Hover over a skill to see details</div>
+            <button class="menu-btn" onclick="game.closeSkillTree()">✕ CLOSE</button>
+        </div>
+        
+        <!-- Crafting -->
+        <div id="crafting" class="overlay">
+            <div class="overlay-title">⚒ CRAFTING</div>
+            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <div style="color: #888;">Materials: <span id="materialDisplay" style="color: #0ff">0</span></div>
+            </div>
+            <div class="grid-container" id="craftingGrid"></div>
+            <button class="menu-btn" onclick="game.closeCrafting()">✕ CLOSE</button>
+        </div>
+        
+        <!-- Notification Area -->
+        <div id="notificationArea"></div>
+        
+        <!-- Combo Display -->
+        <div id="comboDisplay"></div>
+        
+        <!-- Weapon Wheel -->
+        <div id="weaponWheel">
+            <div class="weapon-slot" onclick="game.selectWeapon(0)">1</div>
+            <div class="weapon-slot" onclick="game.selectWeapon(1)">2</div>
+            <div class="weapon-slot" onclick="game.selectWeapon(2)">3</div>
+            <div class="weapon-slot" onclick="game.selectWeapon(3)">4</div>
+            <div class="weapon-slot" onclick="game.selectWeapon(4)">5</div>
+            <div class="weapon-slot" onclick="game.selectWeapon(5)">6</div>
+        </div>
+        
+        <!-- Minimap Canvas -->
+        <canvas id="minimap" width="200" height="120"></canvas>
+    </div>
+
+<script>
+// ==================== FULL JAVASCRIPT GAME CODE (CONTINUED IN NEXT MESSAGE) ====================
+class VoidRunnerUltimate {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        
+        // Game State
+        this.state = 'menu';
+        this.mode = 'story';
+        this.currentLevel = 1;
+        this.maxLevels = 8;
+        this.chapter = 1;
+        this.score = 0;
+        this.coins = 0;
+        this.gems = 0;
+        this.energy = 10;
+        this.maxEnergy = 10;
+        this.premiumCurrency = 0;
+        
+        // Player
+        this.player = {
+            x: 100, y: 300, width: 32, height: 42,
+            vx: 0, vy: 0, speed: 6, jumpPower: 14,
+            health: 100, maxHealth: 100,
+            shield: 0, maxShield: 50,
+            energy: 100, maxEnergy: 100,
+            specialCooldown: 0, specialMaxCooldown: 300,
+            weapon: 'blaster', weapons: ['blaster'],
+            currentWeaponIndex: 0,
+            facing: 1, onGround: false,
+            invincible: 0, damageMultiplier: 1,
+            critChance: 0.05, critDamage: 1.5,
+            luck: 1, combo: 0, comboTimer: 0,
+            buffs: [], debuffs: [],
+            level: 1, xp: 0, xpToNext: 100,
+            skin: 'default', skins: ['default'],
+            artifacts: [], trail: null, aura: null,
+            pet: null, title: 'Runner'
+        };
+        
+        // Progression
+        this.playerLevel = 1;
+        this.playerXP = 0;
+        this.skillPoints = 0;
+        this.deaths = 0;
+        this.levelsCompleted = 0;
+        this.chaptersCompleted = 0;
+        this.totalScore = 0;
+        this.totalKills = 0;
+        this.bestEndless = 0;
+        this.highestWave = 0;
+        
+        // Inventory
+        this.inventory = [];
+        this.equipped = { weapon: 'blaster', artifact1: null, artifact2: null, artifact3: null, skin: 'default', pet: null, title: 'Runner' };
+        this.upgrades = { speed: 0, jump: 0, health: 0, damage: 0, crit: 0, luck: 0, fireRate: 0, range: 0, pierce: 0 };
+        this.materials = { scrap: 0, crystal: 0, essence: 0, core: 0 };
+        this.consumables = {};
+        this.skills = {};
+        
+        // Battle Pass
+        this.bpTier = 1;
+        this.bpXP = 0;
+        this.bpPremium = false;
+        
+        // Achievements & Quests
+        this.achievements = [];
+        this.questData = this.generateQuests();
+        this.dailyQuests = [];
+        this.achievementProgress = {};
+        this.dailyClaimed = false;
+        this.dailyStreak = 0;
+        this.lastLogin = Date.now();
+        this.lastDailyReset = Date.now();
+        
+        // Settings
+        this.settings = {
+            music: true, sfx: true, ambient: true,
+            shake: true, particles: true, bloom: true,
+            damageNums: true, fps: false, autoAim: false,
+            minimap: true, questTracker: true,
+            cloudSave: false, analytics: true,
+            difficulty: 'normal', graphics: 'high'
+        };
+        
+        // Premium
+        this.premium = false;
+        this.premiumTier = null;
+        this.premiumExpiry = null;
+        this.adsWatched = 0;
+        this.iapTotal = 0;
+        this.purchaseHistory = [];
+        
+        // Session
+        this.sessionCount = 1;
+        this.sessionStart = Date.now();
+        this.playTime = 0;
+        this.events = [];
+        
+        // Game World
+        this.platforms = [];
+        this.enemies = [];
+        this.bosses = [];
+        this.projectiles = [];
+        this.particles = [];
+        this.collectibles = [];
+        this.traps = [];
+        this.decorations = [];
+        this.ghostPlayers = [];
+        
+        // Camera
+        this.camera = { x: 0, y: 0 };
+        this.shake = 0;
+        this.flashIntensity = 0;
+        this.bloomIntensity = 0;
+        this.slowMotion = 1;
+        
+        // Level
+        this.levelWidth = 2000;
+        this.levelTime = 0;
+        this.wave = 1;
+        this.waveTimer = 0;
+        this.waveInterval = 600;
+        this.spawnRate = 120;
+        this.spawnTimer = 0;
+        this.depth = 0;
+        this.biome = 'neon_city';
+        
+        // Combat
+        this.combo = 0;
+        this.comboMultiplier = 1;
+        this.bestCombo = 0;
+        this.damageTaken = 0;
+        
+        // UI State
+        this.armoryTab = 'weapons';
+        this.questTab = 'daily';
+        this.lbTab = 'score';
+        
+        // Definitions
+        this.weaponDefs = this.generateWeaponDefs();
+        this.enemyTypes = this.generateEnemyTypes();
+        this.buffTypes = this.generateBuffTypes();
+        this.bossTypes = this.generateBossTypes();
+        this.shopItems = this.generateShopItems();
+        this.recipes = this.generateRecipes();
+        this.skillTree = this.generateSkillTree();
+        this.storyChapters = this.generateStoryChapters();
+        this.leaderboardData = this.generateLeaderboard();
+        this.guildData = this.generateGuildData();
+        this.tournamentData = this.generateTournamentData();
+        
+        // Merge extended content (fix to include your extended weapons/enemies/etc.)
+        this.mergeExtendedContent();
+        
+        // Audio
+        this.audioCtx = null;
+        this.masterGain = null;
+        this.musicGain = null;
+        this.sfxGain = null;
+        this.activeMusic = null;
+        this.initAudio();
+        
+        // Interval tracking for cleanup
+        this.intervals = [];
+        
+        // Performance
+        this.fps = 60;
+        this.frameCount = 0;
+        this.lastTime = 0;
+        this.time = 0;
+        
+        // Input
+        this.keys = {};
+        this.mouse = { x: 0, y: 0, down: false };
+        this.touch = { active: false, x: 0, y: 0 };
+        this.setupInput();
+        
+        // Initialize monetization
+        this.initializeMonetization();
+        
+        // Load data
+        this.loadData();
+        this.checkDailyLogin();
+        this.generateDailyQuests();
+        
+        // Hide loading screen
+        setTimeout(() => {
+            document.getElementById('loadingScreen').style.display = 'none';
+            // Resume audio on first user interaction (fix)
+            const resumeAudio = () => {
+                if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                document.removeEventListener('click', resumeAudio);
+                document.removeEventListener('touchstart', resumeAudio);
+            };
+            document.addEventListener('click', resumeAudio);
+            document.addEventListener('touchstart', resumeAudio);
+        }, 2000);
+        
+        // Start loop
+        this.loop(0);
+        
+        // Cleanup intervals on page unload (fix memory leak)
+        window.addEventListener('beforeunload', () => this.cleanupIntervals());
+    }
+    
+    // ========== FIX: Cleanup intervals ==========
+    cleanupIntervals() {
+        if (this.intervals) this.intervals.forEach(clearInterval);
+        this.intervals = [];
+    }
+    
+    // ========== FIX: Merge extended content (ensures all your extended weapons/enemies/bosses are loaded) ==========
+    mergeExtendedContent() {
+        const extWeapons = this.generateExtendedWeapons();
+        Object.assign(this.weaponDefs, extWeapons);
+        const extEnemies = this.generateExtendedEnemies();
+        Object.assign(this.enemyTypes, extEnemies);
+        const extBosses = this.generateExtendedBosses();
+        Object.assign(this.bossTypes, extBosses);
+        const extShop = this.generateExtendedShopItems();
+        this.shopItems.push(...extShop);
+        const extRecipes = this.generateExtendedRecipes();
+        this.recipes.push(...extRecipes);
+        const extSkills = this.generateExtendedSkillTree();
+        Object.assign(this.skillTree, extSkills);
+        const extStory = this.generateExtendedStory();
+        this.storyChapters.push(...extStory);
+        const extGuild = this.generateExtendedGuildData();
+        Object.assign(this.guildData, extGuild);
+        const extTour = this.generateExtendedTournaments();
+        if (extTour.length) this.tournamentData = extTour[0];
+    }
+    
+    // ========== RESIZE ==========
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.ctx.imageSmoothingEnabled = false;
+    }
+    
+    // ========== AUDIO ==========
+    initAudio() {
+        try {
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            this.masterGain = this.audioCtx.createGain();
+            this.masterGain.gain.value = 0.3;
+            this.musicGain = this.audioCtx.createGain();
+            this.musicGain.gain.value = 0.3;
+            this.sfxGain = this.audioCtx.createGain();
+            this.sfxGain.gain.value = 0.4;
+            this.musicGain.connect(this.masterGain);
+            this.sfxGain.connect(this.masterGain);
+            this.masterGain.connect(this.audioCtx.destination);
+        } catch(e) { console.log('Audio not supported'); }
+    }
+    
+    playSound(freq, type, duration) {
+        if (!this.audioCtx || !this.settings.sfx) return;
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        osc.type = type || 'square';
+        osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, this.audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + (duration || 0.1));
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start();
+        osc.stop(this.audioCtx.currentTime + (duration || 0.1));
+    }
+    
+    // ========== INPUT ==========
+    setupInput() {
+        window.addEventListener('keydown', (e) => {
+            this.keys[e.code] = true;
+            if (e.code === 'KeyP' || e.code === 'Escape') {
+                if (this.state === 'playing') this.pause();
+                else if (this.state === 'paused') this.resume();
+            }
+            if (e.code === 'KeyR') this.fireSpecial();
+            if (e.code === 'KeyE') this.useConsumable('medkit');
+            if (e.code === 'KeyQ') this.cycleWeapon(-1);
+            if (e.code === 'KeyF') this.cycleWeapon(1);
+            if (e.code === 'KeyM') this.toggleMinimap();
+            if (e.code === 'KeyN') this.toggleQuestLog();
+            if (e.code === 'Space' && this.state === 'gameover') this.restart();
+        });
+        window.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
+        this.canvas.addEventListener('mousedown', (e) => {
+            this.mouse.down = true;
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
+            if (this.state === 'playing') this.fire();
+        });
+        this.canvas.addEventListener('mouseup', () => { this.mouse.down = false; });
+        this.canvas.addEventListener('mousemove', (e) => {
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
+        });
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.touch.active = true;
+            this.touch.x = e.touches[0].clientX;
+            this.touch.y = e.touches[0].clientY;
+            if (this.state === 'playing') this.fire();
+        });
+        this.canvas.addEventListener('touchend', () => { this.touch.active = false; });
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length > 0) {
+                this.touch.x = e.touches[0].clientX;
+                this.touch.y = e.touches[0].clientY;
+            }
+        });
+    }
+    
+    // ========== WEAPON DEFINITIONS (FULL ORIGINAL) ==========
+    generateWeaponDefs() {
+        return {
+            blaster: { name: 'Blaster', damage: 25, fireRate: 8, projectileSpeed: 10, spread: 0, pierce: 0, auto: true, icon: '&#9876;', rarity: 'common', desc: 'Standard issue energy weapon' },
+            blaster_mk2: { name: 'Blaster MK-II', damage: 35, fireRate: 10, projectileSpeed: 14, spread: 0, pierce: 1, auto: true, icon: '&#9876;', rarity: 'uncommon', desc: 'Upgraded blaster with pierce' },
+            blaster_mk3: { name: 'Blaster MK-III', damage: 50, fireRate: 12, projectileSpeed: 16, spread: 0, pierce: 2, auto: true, icon: '&#9876;', rarity: 'rare', desc: 'Military-grade dual pierce' },
+            plasma_rifle: { name: 'Plasma Rifle', damage: 40, fireRate: 12, projectileSpeed: 12, spread: 0, pierce: 1, auto: true, icon: '&#9733;', rarity: 'rare', desc: 'Rapid-fire energy weapon' },
+            shotgun: { name: 'Void Shotgun', damage: 15, fireRate: 4, projectileSpeed: 8, spread: 5, pierce: 0, pellets: 6, auto: false, icon: '&#9874;', rarity: 'epic', desc: 'Multi-pellet close range' },
+            sniper: { name: 'Abyss Sniper', damage: 100, fireRate: 1, projectileSpeed: 20, spread: 0, pierce: 5, auto: false, icon: '&#9670;', rarity: 'epic', desc: 'High damage, pierces enemies' },
+            minigun: { name: 'Neon Minigun', damage: 12, fireRate: 20, projectileSpeed: 14, spread: 2, pierce: 0, auto: true, icon: '&#9733;', rarity: 'legendary', desc: 'Extreme fire rate' },
+            rocket: { name: 'Void Rocket', damage: 80, fireRate: 2, projectileSpeed: 6, spread: 0, pierce: 0, explosive: true, radius: 60, auto: false, icon: '&#9670;', rarity: 'legendary', desc: 'Explosive area damage' },
+            laser: { name: 'Laser Cannon', damage: 30, fireRate: 15, projectileSpeed: 25, spread: 0, pierce: 3, auto: true, icon: '&#9876;', rarity: 'epic', desc: 'High velocity beam' },
+            void_reaver: { name: 'Void Reaver', damage: 150, fireRate: 3, projectileSpeed: 8, spread: 0, pierce: 10, homing: true, homingStrength: 0.8, auto: false, icon: '&#9876;', rarity: 'mythic', desc: 'Ultimate void weapon' },
+            plasma_pistol: { name: 'Plasma Pistol', damage: 40, fireRate: 6, projectileSpeed: 10, spread: 1, pierce: 0, auto: false, icon: '&#9733;', rarity: 'common', desc: 'Compact plasma sidearm' },
+            plasma_cannon: { name: 'Plasma Cannon', damage: 60, fireRate: 3, projectileSpeed: 8, spread: 0, pierce: 2, explosive: true, radius: 50, auto: false, icon: '&#9733;', rarity: 'epic', desc: 'Heavy plasma artillery' },
+            scatter_gun: { name: 'Scatter Gun', damage: 12, fireRate: 5, projectileSpeed: 9, spread: 8, pierce: 0, pellets: 8, auto: false, icon: '&#9874;', rarity: 'uncommon', desc: 'Wide spread crowd control' },
+            slug_shotgun: { name: 'Void Slug', damage: 80, fireRate: 2, projectileSpeed: 11, spread: 0, pierce: 5, auto: false, icon: '&#9874;', rarity: 'rare', desc: 'Single heavy slug' },
+            railgun: { name: 'Abyss Railgun', damage: 200, fireRate: 0.5, projectileSpeed: 30, spread: 0, pierce: 20, auto: false, icon: '&#9670;', rarity: 'legendary', desc: 'Devastating accelerator' },
+            beam_rifle: { name: 'Beam Rifle', damage: 5, fireRate: 60, projectileSpeed: 50, spread: 0, pierce: 10, auto: true, icon: '&#9733;', rarity: 'epic', desc: 'Continuous destruction beam' },
+            grenade_launcher: { name: 'Grenade Launcher', damage: 60, fireRate: 2, projectileSpeed: 6, spread: 0, pierce: 0, explosive: true, radius: 100, auto: false, icon: '&#9670;', rarity: 'rare', desc: 'Arcing explosives' },
+            flamethrower: { name: 'Void Flamethrower', damage: 8, fireRate: 20, projectileSpeed: 5, spread: 3, pierce: 3, auto: true, icon: '&#9876;', rarity: 'epic', desc: 'Sustained fire damage' },
+            cryo_gun: { name: 'Cryo Cannon', damage: 15, fireRate: 4, projectileSpeed: 8, spread: 2, pierce: 0, auto: false, icon: '&#9733;', rarity: 'rare', desc: 'Freezes enemies' },
+            tesla_coil: { name: 'Tesla Coil', damage: 25, fireRate: 8, projectileSpeed: 15, spread: 0, pierce: 0, chain: true, chains: 3, auto: true, icon: '&#9670;', rarity: 'epic', desc: 'Chain lightning' },
+            black_hole: { name: 'Singularity', damage: 100, fireRate: 1, projectileSpeed: 4, spread: 0, pierce: 0, blackhole: true, radius: 120, auto: false, icon: '&#9876;', rarity: 'mythic', desc: 'Gravity well' },
+            star_cannon: { name: 'Star Cannon', damage: 300, fireRate: 0.3, projectileSpeed: 25, spread: 0, pierce: 50, auto: false, icon: '&#9733;', rarity: 'mythic', desc: 'Compressed stellar matter' },
+            entropy_gun: { name: 'Entropy Gun', damage: 1, fireRate: 10, projectileSpeed: 8, spread: 1, pierce: 0, entropy: true, auto: true, icon: '&#9670;', rarity: 'legendary', desc: 'Exponential damage growth' },
+            phase_rifle: { name: 'Phase Rifle', damage: 45, fireRate: 5, projectileSpeed: 18, spread: 0, pierce: 0, phase: true, auto: false, icon: '&#9874;', rarity: 'epic', desc: 'Phases through walls' },
+            drone_controller: { name: 'Drone Swarm', damage: 20, fireRate: 1, projectileSpeed: 0, spread: 0, pierce: 0, drone: true, droneCount: 3, auto: true, icon: '&#9733;', rarity: 'legendary', desc: 'Autonomous attack drones' },
+            bio_rifle: { name: 'Bio Rifle', damage: 30, fireRate: 4, projectileSpeed: 7, spread: 0, pierce: 0, bio: true, dot: 5, dotDuration: 180, auto: false, icon: '&#9876;', rarity: 'rare', desc: 'Biological DOT' },
+            sonic_cannon: { name: 'Sonic Cannon', damage: 40, fireRate: 3, projectileSpeed: 12, spread: 0, pierce: 0, knockback: 10, auto: false, icon: '&#9670;', rarity: 'rare', desc: 'Massive knockback' },
+            prism_beam: { name: 'Prism Beam', damage: 35, fireRate: 6, projectileSpeed: 20, spread: 0, pierce: 0, split: true, splitCount: 3, auto: true, icon: '&#9733;', rarity: 'legendary', desc: 'Splits on hit' },
+            temporal_gun: { name: 'Temporal Rifle', damage: 50, fireRate: 2, projectileSpeed: 10, spread: 0, pierce: 0, temporal: true, slowDuration: 120, auto: false, icon: '&#9874;', rarity: 'mythic', desc: 'Time control' }
+        };
+    }
+    
+    // ========== ENEMY TYPES (FULL ORIGINAL) ==========
+    generateEnemyTypes() {
+        return {
+            drone: { name: 'Void Drone', health: 3, speed: 2, damage: 10, score: 50, xp: 10, color: '#f00', size: 24, behavior: 'chase' },
+            sentinel: { name: 'Abyss Sentinel', health: 5, speed: 1.5, damage: 15, score: 80, xp: 15, color: '#0f0', size: 28, behavior: 'patrol' },
+            flyer: { name: 'Neon Flyer', health: 2, speed: 3, damage: 8, score: 40, xp: 8, color: '#ff0', size: 20, behavior: 'fly' },
+            tank: { name: 'Void Tank', health: 15, speed: 0.8, damage: 25, score: 150, xp: 30, color: '#888', size: 40, behavior: 'tank' },
+            spawner: { name: 'Hive Spawner', health: 8, speed: 0.5, damage: 5, score: 200, xp: 40, color: '#f0f', size: 36, behavior: 'spawn', spawnRate: 120, spawnType: 'drone' },
+            assassin: { name: 'Shadow Assassin', health: 4, speed: 4, damage: 30, score: 120, xp: 25, color: '#a0f', size: 26, behavior: 'dash' },
+            sniper: { name: 'Abyss Sniper', health: 3, speed: 0.3, damage: 40, score: 100, xp: 20, color: '#0ff', size: 26, behavior: 'sniper' },
+            healer: { name: 'Nano Healer', health: 5, speed: 2, damage: 10, score: 150, xp: 35, color: '#0ff', size: 28, behavior: 'heal', healRange: 100, healAmount: 2 },
+            bomber: { name: 'Void Bomber', health: 3, speed: 2.5, damage: 50, score: 180, xp: 35, color: '#f44', size: 30, behavior: 'bomber', blastRadius: 80 },
+            mimic: { name: 'Chest Mimic', health: 15, speed: 3, damage: 35, score: 250, xp: 50, color: '#ffd700', size: 32, behavior: 'mimic', disguise: 'chest' },
+            swarm_drone: { name: 'Swarm Drone', health: 1, speed: 4, damage: 8, score: 30, xp: 5, color: '#ff0', size: 15, behavior: 'swarm', swarmSize: 5 },
+            shield_drone: { name: 'Shield Drone', health: 8, speed: 1, damage: 5, score: 80, xp: 20, color: '#88f', size: 30, behavior: 'shield', shieldAmount: 20 },
+            sniper_bot: { name: 'Sniper Bot', health: 3, speed: 0.5, damage: 40, score: 120, xp: 30, color: '#0f0', size: 28, behavior: 'sniper', range: 500 },
+            jumper: { name: 'Abyss Jumper', health: 4, speed: 3, damage: 20, score: 90, xp: 18, color: '#f80', size: 26, behavior: 'jump', jumpPower: 15 },
+            burrower: { name: 'Void Burrower', health: 6, speed: 1, damage: 25, score: 110, xp: 22, color: '#a52', size: 24, behavior: 'burrow', burrowTime: 120 },
+            splitter: { name: 'Cell Splitter', health: 10, speed: 1.5, damage: 15, score: 200, xp: 40, color: '#f0f', size: 35, behavior: 'split', splitCount: 2 },
+            teleporter: { name: 'Phase Teleporter', health: 4, speed: 2, damage: 20, score: 160, xp: 30, color: '#aaf', size: 26, behavior: 'teleport', teleportRange: 200 },
+            leech: { name: 'Energy Leech', health: 3, speed: 2.5, damage: 15, score: 100, xp: 20, color: '#f0a', size: 20, behavior: 'leech', leechAmount: 5 },
+            reflector: { name: 'Mirror Reflector', health: 12, speed: 1, damage: 30, score: 220, xp: 45, color: '#ccc', size: 34, behavior: 'reflect', reflectChance: 0.3 },
+            summoner: { name: 'Dark Summoner', health: 8, speed: 0.8, damage: 20, score: 300, xp: 60, color: '#a0f', size: 38, behavior: 'summon', summonRate: 90, summonType: 'swarm_drone' },
+            corrupted: { name: 'Corrupted Runner', health: 20, speed: 4, damage: 45, score: 400, xp: 80, color: '#0a0', size: 32, behavior: 'player_mimic', mimicAbilities: true },
+            boss_hive: { name: 'Hive Overmind', health: 300, speed: 0.5, damage: 30, score: 5000, xp: 500, color: '#f0f', size: 80, behavior: 'boss_spawn', spawnRate: 60, phases: 3 },
+            boss_titan: { name: 'Void Titan', health: 500, speed: 0.3, damage: 50, score: 8000, xp: 800, color: '#888', size: 100, behavior: 'boss_tank', phases: 3 },
+            boss_ninja: { name: 'Shadow Master', health: 200, speed: 5, damage: 40, score: 6000, xp: 600, color: '#a0f', size: 60, behavior: 'boss_dash', phases: 3 },
+            boss_sniper: { name: 'Abyss Eye', health: 250, speed: 0.2, damage: 60, score: 7000, xp: 700, color: '#0ff', size: 70, behavior: 'boss_sniper', phases: 3 },
+            boss_mech: { name: 'Dreadnought', health: 600, speed: 0.4, damage: 45, score: 10000, xp: 1000, color: '#f80', size: 90, behavior: 'boss_mech', phases: 4 }
+        };
+    }
+    
+    // ========== BUFF/Debuff DEFINITIONS ==========
+    generateBuffTypes() {
+        return {
+            haste: { name: 'Haste', duration: 300, effect: 'speed', value: 1.5, color: '#0ff', icon: '⚡' },
+            berserk: { name: 'Berserk', duration: 240, effect: 'damage', value: 2.0, color: '#f00', icon: '🔥' },
+            shielded: { name: 'Shielded', duration: 600, effect: 'shield', value: 50, color: '#88f', icon: '🛡' },
+            regen: { name: 'Regeneration', duration: 300, effect: 'heal', value: 2, color: '#0f0', icon: '💚' },
+            empowered: { name: 'Empowered', duration: 180, effect: 'crit', value: 0.3, color: '#ffd700', icon: '✨' },
+            invincible: { name: 'Invincible', duration: 120, effect: 'invincible', value: true, color: '#fff', icon: '⭐' },
+            vampiric: { name: 'Vampiric', duration: 300, effect: 'lifesteal', value: 0.2, color: '#f0a', icon: '🩸' },
+            lucky: { name: 'Lucky', duration: 300, effect: 'luck', value: 2.0, color: '#0f0', icon: '🍀' },
+            poisoned: { name: 'Poisoned', duration: 180, effect: 'dot', value: 2, color: '#0f0', icon: '☠' },
+            cursed: { name: 'Cursed', duration: 240, effect: 'damage_down', value: 0.5, color: '#a0f', icon: '🔮' },
+            slowed: { name: 'Slowed', duration: 150, effect: 'speed_down', value: 0.5, color: '#88f', icon: '🐌' },
+            weakened: { name: 'Weakened', duration: 200, effect: 'defense_down', value: 0.5, color: '#f80', icon: '💔' },
+            burning: { name: 'Burning', duration: 120, effect: 'dot', value: 3, color: '#f40', icon: '🔥' },
+            frozen: { name: 'Frozen', duration: 90, effect: 'stun', value: true, color: '#0ff', icon: '❄' },
+            confused: { name: 'Confused', duration: 180, effect: 'reverse_controls', value: true, color: '#f0f', icon: '💫' },
+            marked: { name: 'Marked', duration: 300, effect: 'vulnerable', value: 1.5, color: '#f00', icon: '🎯' }
+        };
+    }
+// ========== BOSS TYPES (FULL ORIGINAL) ==========
+generateBossTypes() {
+    return {
+        overmind: {
+            name: 'Hive Overmind',
+            health: 300, maxHealth: 300,
+            x: 0, y: 0, width: 80, height: 80,
+            speed: 0.5, damage: 30,
+            phases: [
+                { threshold: 0.7, behavior: 'spawn_drones', rate: 90 },
+                { threshold: 0.4, behavior: 'spawn_sentinels', rate: 120 },
+                { threshold: 0.15, behavior: 'berserk', speedMult: 2 }
+            ],
+            attacks: ['spawn', 'charge', 'laser_sweep'],
+            rewards: { coins: 500, gems: 50, xp: 500, materials: { core: 1 } }
+        },
+        titan: {
+            name: 'Void Titan',
+            health: 500, maxHealth: 500,
+            x: 0, y: 0, width: 100, height: 100,
+            speed: 0.3, damage: 50,
+            phases: [
+                { threshold: 0.75, behavior: 'armor_up', defenseMult: 2 },
+                { threshold: 0.5, behavior: 'ground_slam', damage: 40 },
+                { threshold: 0.25, behavior: 'enrage', damageMult: 1.5 }
+            ],
+            attacks: ['slam', 'charge', 'shockwave'],
+            rewards: { coins: 800, gems: 80, xp: 800, materials: { core: 2 } }
+        },
+        shadow_master: {
+            name: 'Shadow Master',
+            health: 200, maxHealth: 200,
+            x: 0, y: 0, width: 60, height: 60,
+            speed: 5, damage: 40,
+            phases: [
+                { threshold: 0.7, behavior: 'clone', clones: 2 },
+                { threshold: 0.4, behavior: 'teleport_spam', rate: 60 },
+                { threshold: 0.1, behavior: 'shadow_storm', duration: 300 }
+            ],
+            attacks: ['dash', 'shuriken', 'shadow_clone'],
+            rewards: { coins: 600, gems: 60, xp: 600, materials: { essence: 3 } }
+        },
+        abyss_eye: {
+            name: 'Abyss Eye',
+            health: 250, maxHealth: 250,
+            x: 0, y: 0, width: 70, height: 70,
+            speed: 0.2, damage: 60,
+            phases: [
+                { threshold: 0.8, behavior: 'laser_eyes', damage: 30 },
+                { threshold: 0.5, behavior: 'homing_shots', rate: 45 },
+                { threshold: 0.2, behavior: 'death_beam', duration: 180 }
+            ],
+            attacks: ['sniper', 'homing', 'beam'],
+            rewards: { coins: 700, gems: 70, xp: 700, materials: { crystal: 5 } }
+        },
+        dreadnought: {
+            name: 'Dreadnought',
+            health: 600, maxHealth: 600,
+            x: 0, y: 0, width: 90, height: 90,
+            speed: 0.4, damage: 45,
+            phases: [
+                { threshold: 0.8, behavior: 'missile_barrage', count: 6 },
+                { threshold: 0.6, behavior: 'shield_phase', shield: 200 },
+                { threshold: 0.35, behavior: 'laser_grid', duration: 240 },
+                { threshold: 0.1, behavior: 'self_destruct', countdown: 300 }
+            ],
+            attacks: ['missile', 'laser', 'bomb'],
+            rewards: { coins: 1000, gems: 100, xp: 1000, materials: { core: 3, scrap: 10 } }
+        }
+    };
+}
+
+// ========== SHOP ITEMS (FULL ORIGINAL) ==========
+generateShopItems() {
+    return [
+        // Weapons
+        { id: 'blaster_mk2', name: 'Blaster MK-II', type: 'weapon', cost: 500, currency: 'coins', rarity: 'uncommon', icon: '⚔' },
+        { id: 'plasma_rifle', name: 'Plasma Rifle', type: 'weapon', cost: 1200, currency: 'coins', rarity: 'rare', icon: '⚔' },
+        { id: 'shotgun', name: 'Void Shotgun', type: 'weapon', cost: 2500, currency: 'coins', rarity: 'epic', icon: '⚔' },
+        { id: 'sniper', name: 'Abyss Sniper', type: 'weapon', cost: 3000, currency: 'coins', rarity: 'epic', icon: '⚔' },
+        { id: 'minigun', name: 'Neon Minigun', type: 'weapon', cost: 5000, currency: 'coins', rarity: 'legendary', icon: '⚔' },
+        { id: 'rocket', name: 'Void Rocket', type: 'weapon', cost: 4000, currency: 'coins', rarity: 'legendary', icon: '⚔' },
+        { id: 'railgun', name: 'Abyss Railgun', type: 'weapon', cost: 8000, currency: 'coins', rarity: 'legendary', icon: '⚔' },
+        { id: 'void_reaver', name: 'Void Reaver', type: 'weapon', cost: 15000, currency: 'coins', rarity: 'mythic', icon: '⚔' },
+        { id: 'star_cannon', name: 'Star Cannon', type: 'weapon', cost: 20000, currency: 'coins', rarity: 'mythic', icon: '⚔' },
+        // Abilities
+        { id: 'dash', name: 'Void Dash', type: 'ability', cost: 800, currency: 'coins', rarity: 'rare', desc: 'Quick dash with i-frames' },
+        { id: 'time_stop', name: 'Time Stop', type: 'ability', cost: 1500, currency: 'coins', rarity: 'epic', desc: 'Freeze time for 3 seconds' },
+        { id: 'black_hole', name: 'Singularity', type: 'ability', cost: 3000, currency: 'coins', rarity: 'legendary', desc: 'Create gravity well' },
+        { id: 'nuke', name: 'Void Nuke', type: 'ability', cost: 2500, currency: 'coins', rarity: 'legendary', desc: 'Screen-wide damage' },
+        { id: 'heal_wave', name: 'Heal Wave', type: 'ability', cost: 1000, currency: 'coins', rarity: 'rare', desc: 'Heal 50% HP' },
+        { id: 'shield_burst', name: 'Shield Burst', type: 'ability', cost: 1200, currency: 'coins', rarity: 'rare', desc: 'Full shield + reflect' },
+        // Artifacts
+        { id: 'crit_lens', name: 'Crit Lens', type: 'artifact', cost: 2000, currency: 'coins', rarity: 'rare', effect: '+15% crit chance' },
+        { id: 'vamp_fang', name: 'Vampiric Fang', type: 'artifact', cost: 2500, currency: 'coins', rarity: 'epic', effect: '+10% lifesteal' },
+        { id: 'luck_charm', name: 'Rabbit\'s Foot', type: 'artifact', cost: 1500, currency: 'coins', rarity: 'uncommon', effect: '+20% luck' },
+        { id: 'speed_boots', name: 'Neon Boots', type: 'artifact', cost: 1800, currency: 'coins', rarity: 'rare', effect: '+20% move speed' },
+        { id: 'damage_core', name: 'Damage Core', type: 'artifact', cost: 3000, currency: 'coins', rarity: 'epic', effect: '+25% damage' },
+        { id: 'pierce_shard', name: 'Pierce Shard', type: 'artifact', cost: 2200, currency: 'coins', rarity: 'rare', effect: '+2 pierce' },
+        { id: 'fire_rate_boost', name: 'Overclock Chip', type: 'artifact', cost: 2800, currency: 'coins', rarity: 'epic', effect: '+30% fire rate' },
+        { id: 'gold_magnet', name: 'Gold Magnet', type: 'artifact', cost: 1000, currency: 'coins', rarity: 'uncommon', effect: 'Auto-collect coins' },
+        { id: 'xp_boost', name: 'XP Amplifier', type: 'artifact', cost: 3500, currency: 'coins', rarity: 'legendary', effect: '+50% XP gain' },
+        { id: 'resurrection', name: 'Phoenix Feather', type: 'artifact', cost: 5000, currency: 'coins', rarity: 'legendary', effect: 'Auto-revive once' },
+        // Skins
+        { id: 'neon', name: 'Neon Runner', type: 'skin', cost: 500, currency: 'gems', rarity: 'rare', color: '#0ff' },
+        { id: 'crimson', name: 'Crimson Reaper', type: 'skin', cost: 1000, currency: 'gems', rarity: 'epic', color: '#f00' },
+        { id: 'gold', name: 'Golden Legend', type: 'skin', cost: 2000, currency: 'gems', rarity: 'legendary', color: '#ffd700' },
+        { id: 'void', name: 'Void Walker', type: 'skin', cost: 3000, currency: 'gems', rarity: 'mythic', color: '#a0f' },
+        { id: 'cyber', name: 'Cyber Punk', type: 'skin', cost: 800, currency: 'gems', rarity: 'rare', color: '#f0f' },
+        { id: 'ghost', name: 'Ghost Protocol', type: 'skin', cost: 1500, currency: 'gems', rarity: 'epic', color: '#fff' },
+        // Consumables
+        { id: 'medkit', name: 'Medkit', type: 'consumable', cost: 50, currency: 'coins', rarity: 'common', effect: 'Heal 50 HP' },
+        { id: 'energy_cell', name: 'Energy Cell', type: 'consumable', cost: 75, currency: 'coins', rarity: 'common', effect: 'Restore 50 Energy' },
+        { id: 'grenade', name: 'Void Grenade', type: 'consumable', cost: 100, currency: 'coins', rarity: 'uncommon', effect: '80 damage AOE' },
+        { id: 'shield_pack', name: 'Shield Pack', type: 'consumable', cost: 120, currency: 'coins', rarity: 'uncommon', effect: '+30 Shield' },
+        { id: 'haste_potion', name: 'Haste Potion', type: 'consumable', cost: 150, currency: 'coins', rarity: 'rare', effect: 'Speed x1.5 for 10s' },
+        { id: 'berserk_potion', name: 'Berserk Potion', type: 'consumable', cost: 200, currency: 'coins', rarity: 'rare', effect: 'Damage x2 for 8s' },
+        { id: 'luck_potion', name: 'Luck Potion', type: 'consumable', cost: 180, currency: 'coins', rarity: 'rare', effect: 'Luck x2 for 30s' },
+        { id: 'continue_token', name: 'Continue Token', type: 'consumable', cost: 10, currency: 'gems', rarity: 'epic', effect: 'Continue after death' }
+    ];
+}
+
+// ========== CRAFTING RECIPES ==========
+generateRecipes() {
+    return [
+        { id: 'blaster_mk2', name: 'Blaster MK-II', result: 'weapon', materials: { scrap: 5, crystal: 2 }, cost: 200 },
+        { id: 'plasma_rifle', name: 'Plasma Rifle', result: 'weapon', materials: { scrap: 8, crystal: 4, essence: 1 }, cost: 500 },
+        { id: 'shotgun', name: 'Void Shotgun', result: 'weapon', materials: { scrap: 12, crystal: 6, essence: 2 }, cost: 800 },
+        { id: 'sniper', name: 'Abyss Sniper', result: 'weapon', materials: { scrap: 15, crystal: 8, essence: 3 }, cost: 1000 },
+        { id: 'minigun', name: 'Neon Minigun', result: 'weapon', materials: { scrap: 20, crystal: 10, core: 1 }, cost: 1500 },
+        { id: 'railgun', name: 'Abyss Railgun', result: 'weapon', materials: { scrap: 25, crystal: 15, core: 2, essence: 5 }, cost: 2500 },
+        { id: 'void_reaver', name: 'Void Reaver', result: 'weapon', materials: { scrap: 50, crystal: 30, core: 5, essence: 10 }, cost: 5000 },
+        { id: 'crit_lens', name: 'Crit Lens', result: 'artifact', materials: { crystal: 5, essence: 2 }, cost: 500 },
+        { id: 'vamp_fang', name: 'Vampiric Fang', result: 'artifact', materials: { scrap: 10, essence: 5 }, cost: 800 },
+        { id: 'damage_core', name: 'Damage Core', result: 'artifact', materials: { scrap: 15, crystal: 10, core: 1 }, cost: 1200 },
+        { id: 'resurrection', name: 'Phoenix Feather', result: 'artifact', materials: { scrap: 30, crystal: 20, core: 3, essence: 10 }, cost: 3000 },
+        { id: 'haste_potion', name: 'Haste Potion', result: 'consumable', materials: { essence: 2 }, cost: 50 },
+        { id: 'berserk_potion', name: 'Berserk Potion', result: 'consumable', materials: { essence: 3, crystal: 2 }, cost: 100 },
+        { id: 'continue_token', name: 'Continue Token', result: 'consumable', materials: { core: 1, essence: 5 }, cost: 200 }
+    ];
+}
+
+// ========== SKILL TREE ==========
+generateSkillTree() {
+    return {
+        combat: [
+            { id: 'c1', name: 'Sharpshooter', tier: 1, max: 5, cost: 1, effect: 'critChance', value: 0.02, desc: '+2% crit chance' },
+            { id: 'c2', name: 'Heavy Hitter', tier: 1, max: 5, cost: 1, effect: 'critDamage', value: 0.1, desc: '+10% crit damage' },
+            { id: 'c3', name: 'Rapid Fire', tier: 2, max: 3, cost: 2, effect: 'fireRate', value: 0.1, desc: '+10% fire rate', req: 'c1' },
+            { id: 'c4', name: 'Piercing Shot', tier: 2, max: 3, cost: 2, effect: 'pierce', value: 1, desc: '+1 pierce', req: 'c2' },
+            { id: 'c5', name: 'Berserker', tier: 3, max: 1, cost: 5, effect: 'berserk', value: true, desc: 'Unlock Berserk mode', req: 'c3' },
+            { id: 'c6', name: 'Overkill', tier: 3, max: 3, cost: 3, effect: 'overkill', value: 0.15, desc: '+15% overkill damage', req: 'c4' },
+            { id: 'c7', name: 'Weapon Master', tier: 4, max: 1, cost: 10, effect: 'dual_wield', value: true, desc: 'Dual wield weapons', req: 'c5' }
+        ],
+        survival: [
+            { id: 's1', name: 'Tough Skin', tier: 1, max: 5, cost: 1, effect: 'maxHealth', value: 10, desc: '+10 max HP' },
+            { id: 's2', name: 'Energy Reserve', tier: 1, max: 5, cost: 1, effect: 'maxEnergy', value: 10, desc: '+10 max energy' },
+            { id: 's3', name: 'Regeneration', tier: 2, max: 3, cost: 2, effect: 'regen', value: 1, desc: '+1 HP/s regen', req: 's1' },
+            { id: 's4', name: 'Shield Master', tier: 2, max: 3, cost: 2, effect: 'maxShield', value: 15, desc: '+15 max shield', req: 's2' },
+            { id: 's5', name: 'Second Wind', tier: 3, max: 1, cost: 5, effect: 'second_wind', value: true, desc: 'Heal 30% at 20% HP', req: 's3' },
+            { id: 's6', name: 'Iron Will', tier: 3, max: 3, cost: 3, effect: 'damageReduction', value: 0.05, desc: '+5% damage reduction', req: 's4' },
+            { id: 's7', name: 'Immortal', tier: 4, max: 1, cost: 10, effect: 'immortal', value: true, desc: '1 HP minimum', req: 's5' }
+        ],
+        agility: [
+            { id: 'a1', name: 'Swift Feet', tier: 1, max: 5, cost: 1, effect: 'speed', value: 0.05, desc: '+5% move speed' },
+            { id: 'a2', name: 'High Jumper', tier: 1, max: 5, cost: 1, effect: 'jump', value: 0.1, desc: '+10% jump power' },
+            { id: 'a3', name: 'Dash Mastery', tier: 2, max: 3, cost: 2, effect: 'dashCooldown', value: -0.1, desc: '-10% dash cooldown', req: 'a1' },
+            { id: 'a4', name: 'Air Control', tier: 2, max: 3, cost: 2, effect: 'airControl', value: 0.1, desc: '+10% air control', req: 'a2' },
+            { id: 'a5', name: 'Phase Walk', tier: 3, max: 1, cost: 5, effect: 'phase', value: true, desc: 'Walk through enemies', req: 'a3' },
+            { id: 'a6', name: 'Double Jump', tier: 3, max: 1, cost: 5, effect: 'doubleJump', value: true, desc: 'Double jump unlock', req: 'a4' },
+            { id: 'a7', name: 'Void Walker', tier: 4, max: 1, cost: 10, effect: 'void_walk', value: true, desc: 'Fly for 3s', req: 'a5' }
+        ],
+        luck: [
+            { id: 'l1', name: 'Lucky Star', tier: 1, max: 5, cost: 1, effect: 'luck', value: 0.1, desc: '+10% luck' },
+            { id: 'l2', name: 'Gold Digger', tier: 1, max: 5, cost: 1, effect: 'coinBonus', value: 0.05, desc: '+5% coins' },
+            { id: 'l3', name: 'Gem Finder', tier: 2, max: 3, cost: 2, effect: 'gemBonus', value: 0.1, desc: '+10% gems', req: 'l1' },
+            { id: 'l4', name: 'Treasure Hunter', tier: 2, max: 3, cost: 2, effect: 'rareDrop', value: 0.05, desc: '+5% rare drops', req: 'l2' },
+            { id: 'l5', name: 'Jackpot', tier: 3, max: 1, cost: 5, effect: 'jackpot', value: true, desc: '10x coin chance', req: 'l3' },
+            { id: 'l6', name: 'Midas Touch', tier: 3, max: 3, cost: 3, effect: 'midas', value: 0.1, desc: '10% enemy to gold', req: 'l4' },
+            { id: 'l7', name: 'Fortune\'s Favor', tier: 4, max: 1, cost: 10, effect: 'fortune', value: true, desc: 'Guaranteed legendary', req: 'l5' }
+        ]
+    };
+}
+
+// ========== STORY CHAPTERS ==========
+generateStoryChapters() {
+    return [
+        { id: 1, name: 'The Fall', desc: 'Enter the Abyss', levels: 3, biome: 'neon_city', boss: 'overmind', unlock: null },
+        { id: 2, name: 'Steel Graveyard', desc: 'Machines of war', levels: 3, biome: 'scrapyard', boss: 'titan', unlock: 1 },
+        { id: 3, name: 'Shadow Protocol', desc: 'Assassins in the dark', levels: 3, biome: 'shadow_realm', boss: 'shadow_master', unlock: 2 },
+        { id: 4, name: 'Crystal Depths', desc: 'Shattered light', levels: 3, biome: 'crystal_cave', boss: 'abyss_eye', unlock: 3 },
+        { id: 5, name: 'Dreadnought', desc: 'The final stand', levels: 3, biome: 'mech_factory', boss: 'dreadnought', unlock: 4 },
+        { id: 6, name: 'Void Heart', desc: 'Beyond the edge', levels: 3, biome: 'void_heart', boss: 'overmind', unlock: 5 },
+        { id: 7, name: 'Abyss Protocol', desc: 'The truth revealed', levels: 3, biome: 'protocol_lab', boss: 'dreadnought', unlock: 6 },
+        { id: 8, name: 'Eternal Runner', desc: 'Infinite descent', levels: 1, biome: 'eternal_void', boss: 'all', unlock: 7 }
+    ];
+}
+
+// ========== LEADERBOARD DATA ==========
+generateLeaderboard() {
+    const names = ['NeonStriker', 'VoidWalker', 'AbyssHunter', 'CyberNinja', 'StarLord', 'ShadowBlade', 'QuantumLeap', 'NovaBurst', 'DarkMatter', 'PhotonRush'];
+    const data = { score: [], wave: [], speed: [], accuracy: [] };
+    for (let i = 0; i < 50; i++) {
+        const name = names[Math.floor(Math.random() * names.length)] + '_' + Math.floor(Math.random() * 999);
+        data.score.push({ rank: i + 1, name, score: Math.floor(1000000 / (i + 1)), country: ['US', 'JP', 'KR', 'DE', 'BR', 'RU'][Math.floor(Math.random() * 6)] });
+        data.wave.push({ rank: i + 1, name, wave: Math.floor(100 / (i + 1) + 5), country: ['US', 'JP', 'KR', 'DE', 'BR', 'RU'][Math.floor(Math.random() * 6)] });
+        data.speed.push({ rank: i + 1, name, time: Math.floor(300 + i * 10), country: ['US', 'JP', 'KR', 'DE', 'BR', 'RU'][Math.floor(Math.random() * 6)] });
+        data.accuracy.push({ rank: i + 1, name, accuracy: Math.floor(95 - i * 0.5), country: ['US', 'JP', 'KR', 'DE', 'BR', 'RU'][Math.floor(Math.random() * 6)] });
+    }
+    return data;
+}
+
+// ========== GUILD DATA ==========
+generateGuildData() {
+    return {
+        name: 'Void Runners',
+        level: 1, xp: 0, xpToNext: 1000,
+        members: [
+            { name: 'GuildMaster', role: 'leader', level: 50, contribution: 50000 },
+            { name: 'Officer1', role: 'officer', level: 35, contribution: 25000 },
+            { name: 'Officer2', role: 'officer', level: 30, contribution: 20000 },
+            { name: 'Member1', role: 'member', level: 20, contribution: 10000 },
+            { name: 'Member2', role: 'member', level: 15, contribution: 5000 }
+        ],
+        perks: ['+5% coins', '+5% XP', 'Guild shop access'],
+        missions: [
+            { id: 1, name: 'Hive Hunt', desc: 'Defeat 100 swarm drones', progress: 45, target: 100, reward: { coins: 1000, xp: 500 } },
+            { id: 2, name: 'Boss Rush', desc: 'Defeat 5 bosses', progress: 2, target: 5, reward: { gems: 50, xp: 1000 } },
+            { id: 3, name: 'Material Run', desc: 'Collect 50 cores', progress: 12, target: 50, reward: { coins: 2000, materials: { core: 2 } } }
+        ],
+        leaderboard: [
+            { name: 'GuildMaster', contribution: 50000 },
+            { name: 'Officer1', contribution: 25000 },
+            { name: 'Officer2', contribution: 20000 },
+            { name: 'Member1', contribution: 10000 },
+            { name: 'Member2', contribution: 5000 }
+        ]
+    };
+}
+
+// ========== TOURNAMENT DATA ==========
+generateTournamentData() {
+    return {
+        active: true,
+        name: 'Abyss Championship',
+        timeRemaining: 86400,
+        prizes: [
+            { rank: 1, reward: { gems: 1000, skin: 'champion', title: 'Champion' } },
+            { rank: 2, reward: { gems: 500, skin: 'silver', title: 'Runner-Up' } },
+            { rank: 3, reward: { gems: 250, skin: 'bronze', title: 'Third Place' } },
+            { rank: '4-10', reward: { gems: 100, title: 'Top 10' } },
+            { rank: '11-50', reward: { gems: 50, title: 'Competitor' } }
+        ],
+        leaderboard: [
+            { rank: 1, name: 'NeonStriker_42', score: 500000, country: 'JP' },
+            { rank: 2, name: 'VoidWalker_88', score: 450000, country: 'KR' },
+            { rank: 3, name: 'AbyssHunter_77', score: 400000, country: 'US' },
+            { rank: 4, name: 'CyberNinja_33', score: 350000, country: 'DE' },
+            { rank: 5, name: 'StarLord_99', score: 300000, country: 'BR' }
+        ],
+        myRank: 47,
+        myScore: 25000
+    };
+}
+
+// ========== EXTENDED CONTENT (YOUR ORIGINAL EXTENDED METHODS) ==========
+generateExtendedWeapons() {
+    return {
+        ion_rifle: { name: 'Ion Rifle', damage: 55, fireRate: 8, projectileSpeed: 14, spread: 0, pierce: 2, auto: true, icon: '⚡', rarity: 'epic', desc: 'Ionized particle beam' },
+        fusion_cannon: { name: 'Fusion Cannon', damage: 120, fireRate: 2, projectileSpeed: 10, spread: 0, pierce: 5, explosive: true, radius: 80, auto: false, icon: '☢', rarity: 'legendary', desc: 'Nuclear fusion blast' },
+        antimatter_gun: { name: 'Antimatter Gun', damage: 500, fireRate: 0.5, projectileSpeed: 20, spread: 0, pierce: 50, auto: false, icon: '💥', rarity: 'mythic', desc: 'Matter-antimatter annihilation' },
+        energy_whip: { name: 'Energy Whip', damage: 35, fireRate: 6, projectileSpeed: 12, spread: 0, pierce: 0, chain: true, chains: 5, auto: false, icon: '〰', rarity: 'rare', desc: 'Chain lightning whip' },
+        void_blade: { name: 'Void Blade', damage: 80, fireRate: 4, projectileSpeed: 8, spread: 0, pierce: 3, auto: false, icon: '⚔', rarity: 'epic', desc: 'Melee-range void slash' },
+        mine_layer: { name: 'Mine Layer', damage: 100, fireRate: 1, projectileSpeed: 0, spread: 0, pierce: 0, mine: true, radius: 100, auto: false, icon: '💣', rarity: 'rare', desc: 'Deployable proximity mines' },
+        turret_deploy: { name: 'Sentry Turret', damage: 25, fireRate: 10, projectileSpeed: 12, spread: 1, pierce: 0, turret: true, turretCount: 1, auto: false, icon: '🔫', rarity: 'epic', desc: 'Deployable auto-turret' },
+        healing_beam: { name: 'Healing Beam', damage: -20, fireRate: 15, projectileSpeed: 20, spread: 0, pierce: 0, healing: true, auto: true, icon: '💚', rarity: 'rare', desc: 'Heal yourself over time' },
+        shield_beam: { name: 'Shield Projector', damage: 0, fireRate: 10, projectileSpeed: 15, spread: 0, pierce: 0, shielding: true, shieldAmount: 5, auto: true, icon: '🛡', rarity: 'epic', desc: 'Regenerate shield rapidly' },
+        gravity_gun: { name: 'Gravity Gun', damage: 10, fireRate: 3, projectileSpeed: 6, spread: 0, pierce: 0, gravity: true, pullStrength: 0.5, auto: false, icon: '🌀', rarity: 'legendary', desc: 'Pull enemies together' },
+        swap_gun: { name: 'Phase Swapper', damage: 0, fireRate: 1, projectileSpeed: 25, spread: 0, pierce: 0, swap: true, auto: false, icon: '⇄', rarity: 'mythic', desc: 'Swap position with enemy' },
+        clone_gun: { name: 'Duplicator', damage: 0, fireRate: 0.5, projectileSpeed: 5, spread: 0, pierce: 0, clone: true, auto: false, icon: '👥', rarity: 'mythic', desc: 'Create temporary clone' },
+        omega_cannon: { name: 'Omega Cannon', damage: 1000, fireRate: 0.2, projectileSpeed: 30, spread: 0, pierce: 100, explosive: true, radius: 200, auto: false, icon: '☠', rarity: 'mythic', desc: 'Ultimate destruction' },
+        reality_tear: { name: 'Reality Tear', damage: 200, fireRate: 1, projectileSpeed: 8, spread: 0, pierce: 0, reality: true, radius: 150, auto: false, icon: '🔮', rarity: 'mythic', desc: 'Tear in spacetime' },
+        divine_lance: { name: 'Divine Lance', damage: 400, fireRate: 2, projectileSpeed: 25, spread: 0, pierce: 30, holy: true, auto: false, icon: '✝', rarity: 'mythic', desc: 'Holy energy spear' }
+    };
+}
+
+generateExtendedEnemies() {
+    return {
+        elite_drone: { name: 'Elite Drone', health: 8, speed: 3, damage: 20, score: 100, xp: 20, color: '#f44', size: 28, behavior: 'chase', elite: true },
+        elite_sentinel: { name: 'Elite Sentinel', health: 12, speed: 2, damage: 25, score: 150, xp: 30, color: '#0f0', size: 32, behavior: 'patrol', elite: true },
+        elite_flyer: { name: 'Elite Flyer', health: 5, speed: 5, damage: 15, score: 80, xp: 15, color: '#ff4', size: 24, behavior: 'fly', elite: true },
+        chaser: { name: 'Void Chaser', health: 6, speed: 5, damage: 20, score: 120, xp: 25, color: '#f08', size: 26, behavior: 'chase', acceleration: 0.2 },
+        orbiter: { name: 'Orbital Drone', health: 4, speed: 3, damage: 12, score: 90, xp: 18, color: '#80f', size: 22, behavior: 'orbit', orbitRadius: 150 },
+        kamikaze: { name: 'Kamikaze Bot', health: 2, speed: 6, damage: 60, score: 200, xp: 40, color: '#f00', size: 20, behavior: 'kamikaze', blastRadius: 100 },
+        spitter: { name: 'Acid Spitter', health: 5, speed: 1, damage: 8, score: 110, xp: 22, color: '#8f0', size: 30, behavior: 'spit', spitRate: 60, spitDamage: 15 },
+        builder: { name: 'Turret Builder', health: 10, speed: 0.5, damage: 5, score: 250, xp: 50, color: '#f80', size: 36, behavior: 'build', buildRate: 180, buildType: 'mini_turret' },
+        stealer: { name: 'Coin Thief', health: 3, speed: 4, damage: 10, score: 50, xp: 10, color: '#ffd700', size: 20, behavior: 'steal', stealAmount: 5 },
+        phantom: { name: 'Void Phantom', health: 8, speed: 3, damage: 25, score: 180, xp: 35, color: '#888', size: 28, behavior: 'phantom', phaseChance: 0.3 },
+        regenerator: { name: 'Regenerator', health: 15, speed: 1, damage: 15, score: 300, xp: 60, color: '#0f8', size: 34, behavior: 'regen', regenRate: 1 },
+        armored: { name: 'Armored Drone', health: 25, speed: 0.8, damage: 20, score: 350, xp: 70, color: '#888', size: 38, behavior: 'tank', armor: 0.5 },
+        mini_boss_brute: { name: 'Brute Commander', health: 80, speed: 1.5, damage: 35, score: 1000, xp: 200, color: '#f00', size: 60, behavior: 'mini_boss', phases: 2 },
+        mini_boss_wizard: { name: 'Void Wizard', health: 50, speed: 2, damage: 30, score: 1200, xp: 250, color: '#a0f', size: 50, behavior: 'mini_boss_caster', spells: ['fireball', 'teleport', 'summon'] },
+        mini_boss_juggernaut: { name: 'Juggernaut', health: 120, speed: 0.5, damage: 45, score: 1500, xp: 300, color: '#f80', size: 70, behavior: 'mini_boss_tank', chargeAttack: true }
+    };
+}
+
+generateExtendedBosses() {
+    return {
+        cyber_dragon: {
+            name: 'Cyber Dragon',
+            health: 800, maxHealth: 800,
+            x: 0, y: 0, width: 120, height: 80,
+            speed: 1, damage: 60,
+            phases: [
+                { threshold: 0.8, behavior: 'fire_breath', damage: 40 },
+                { threshold: 0.6, behavior: 'wing_storm', knockback: 15 },
+                { threshold: 0.4, behavior: 'summon_cyber_drones', count: 5 },
+                { threshold: 0.2, behavior: 'omega_beam', duration: 180 }
+            ],
+            attacks: ['bite', 'fire_breath', 'tail_sweep', 'omega_beam'],
+            rewards: { coins: 1500, gems: 150, xp: 1500, materials: { core: 5, crystal: 10 } }
+        },
+        neural_overmind: {
+            name: 'Neural Overmind',
+            health: 600, maxHealth: 600,
+            x: 0, y: 0, width: 100, height: 100,
+            speed: 0.3, damage: 50,
+            phases: [
+                { threshold: 0.75, behavior: 'mind_control', duration: 120 },
+                { threshold: 0.5, behavior: 'neural_blast', damage: 35 },
+                { threshold: 0.25, behavior: 'reality_shift', teleport: true }
+            ],
+            attacks: ['neural_blast', 'mind_control', 'summon_illusions', 'reality_shift'],
+            rewards: { coins: 1200, gems: 120, xp: 1200, materials: { essence: 8, core: 3 } }
+        },
+        time_serpent: {
+            name: 'Time Serpent',
+            health: 1000, maxHealth: 1000,
+            x: 0, y: 0, width: 150, height: 60,
+            speed: 2, damage: 45,
+            phases: [
+                { threshold: 0.85, behavior: 'time_slow', slowFactor: 0.5 },
+                { threshold: 0.6, behavior: 'rewind', heal: 100 },
+                { threshold: 0.35, behavior: 'time_stop', duration: 90 },
+                { threshold: 0.1, behavior: 'paradox', clone: true }
+            ],
+            attacks: ['bite', 'time_bolt', 'temporal_rift', 'paradox_clone'],
+            rewards: { coins: 2000, gems: 200, xp: 2000, materials: { essence: 10, core: 5 } }
+        },
+        void_leviathan: {
+            name: 'Void Leviathan',
+            health: 1500, maxHealth: 1500,
+            x: 0, y: 0, width: 200, height: 100,
+            speed: 0.4, damage: 80,
+            phases: [
+                { threshold: 0.9, behavior: 'tentacle_slam', damage: 50 },
+                { threshold: 0.7, behavior: 'void_vortex', pullRadius: 300 },
+                { threshold: 0.5, behavior: 'ink_cloud', blind: true },
+                { threshold: 0.3, behavior: 'devour', instantKill: true },
+                { threshold: 0.1, behavior: 'final_form', speedMult: 3 }
+            ],
+            attacks: ['tentacle_slam', 'void_vortex', 'ink_cloud', 'devour', 'final_form'],
+            rewards: { coins: 3000, gems: 300, xp: 3000, materials: { core: 10, essence: 15, scrap: 20 } }
+        }
+    };
+}
+
+generateExtendedShopItems() {
+    return [
+        { id: 'ion_rifle', name: 'Ion Rifle', type: 'weapon', cost: 3500, currency: 'coins', rarity: 'epic', icon: '⚡' },
+        { id: 'fusion_cannon', name: 'Fusion Cannon', type: 'weapon', cost: 6000, currency: 'coins', rarity: 'legendary', icon: '☢' },
+        { id: 'gravity_gun', name: 'Gravity Gun', type: 'weapon', cost: 4500, currency: 'coins', rarity: 'legendary', icon: '🌀' },
+        { id: 'omega_cannon', name: 'Omega Cannon', type: 'weapon', cost: 25000, currency: 'coins', rarity: 'mythic', icon: '☠' },
+        { id: 'ammo_box', name: 'Infinite Ammo', type: 'artifact', cost: 3000, currency: 'coins', rarity: 'legendary', effect: 'No energy cost' },
+        { id: 'time_dilation', name: 'Time Dilation', type: 'artifact', cost: 4000, currency: 'coins', rarity: 'legendary', effect: 'Slow enemies 20%' },
+        { id: 'void_shield', name: 'Void Shield', type: 'artifact', cost: 3500, currency: 'coins', rarity: 'epic', effect: 'Reflect 30% damage' },
+        { id: 'quantum_core', name: 'Quantum Core', type: 'artifact', cost: 5000, currency: 'coins', rarity: 'mythic', effect: 'Random buff every 30s' },
+        { id: 'necro_amulet', name: 'Necrotic Amulet', type: 'artifact', cost: 2800, currency: 'coins', rarity: 'epic', effect: 'Enemies explode on death' },
+        { id: 'wind_boots', name: 'Wind Boots', type: 'artifact', cost: 2200, currency: 'coins', rarity: 'rare', effect: 'Dash cooldown -50%' },
+        { id: 'blood_pact', name: 'Blood Pact', type: 'artifact', cost: 3200, currency: 'coins', rarity: 'epic', effect: 'Damage +50%, health -30%' },
+        { id: 'holy_symbol', name: 'Holy Symbol', type: 'artifact', cost: 3800, currency: 'coins', rarity: 'legendary', effect: 'Immune to debuffs' },
+        { id: 'infernal', name: 'Infernal Demon', type: 'skin', cost: 2500, currency: 'gems', rarity: 'legendary', color: '#f40' },
+        { id: 'frost', name: 'Frost Wraith', type: 'skin', cost: 2500, currency: 'gems', rarity: 'legendary', color: '#aaf' },
+        { id: 'nature', name: 'Nature Guardian', type: 'skin', cost: 1800, currency: 'gems', rarity: 'epic', color: '#0f0' },
+        { id: 'thunder', name: 'Thunder God', type: 'skin', cost: 3000, currency: 'gems', rarity: 'mythic', color: '#ff0' },
+        { id: 'blood', name: 'Blood Lord', type: 'skin', cost: 2000, currency: 'gems', rarity: 'epic', color: '#f00' },
+        { id: 'mecha', name: 'Mecha Suit', type: 'skin', cost: 3500, currency: 'gems', rarity: 'mythic', color: '#888' },
+        { id: 'pet_drone', name: 'Combat Drone', type: 'pet', cost: 1000, currency: 'gems', rarity: 'rare', effect: 'Auto-attacks nearby enemies' },
+        { id: 'pet_healer', name: 'Nano Healer', type: 'pet', cost: 1500, currency: 'gems', rarity: 'epic', effect: 'Heals 1 HP/s' },
+        { id: 'pet_looter', name: 'Loot Bot', type: 'pet', cost: 2000, currency: 'gems', rarity: 'legendary', effect: 'Auto-collects drops' },
+        { id: 'pet_shield', name: 'Shield Bot', type: 'pet', cost: 2500, currency: 'gems', rarity: 'legendary', effect: '+20 max shield' },
+        { id: 'title_runner', name: 'Runner', type: 'title', cost: 0, currency: 'coins', rarity: 'common' },
+        { id: 'title_veteran', name: 'Veteran', type: 'title', cost: 500, currency: 'coins', rarity: 'uncommon' },
+        { id: 'title_elite', name: 'Elite', type: 'title', cost: 1000, currency: 'coins', rarity: 'rare' },
+        { id: 'title_master', name: 'Master', type: 'title', cost: 2000, currency: 'coins', rarity: 'epic' },
+        { id: 'title_legend', name: 'Legend', type: 'title', cost: 5000, currency: 'coins', rarity: 'legendary' },
+        { id: 'title_god', name: 'Void God', type: 'title', cost: 10000, currency: 'coins', rarity: 'mythic' }
+    ];
+}
+
+generateExtendedRecipes() {
+    return [
+        { id: 'ion_rifle', name: 'Ion Rifle', result: 'weapon', materials: { scrap: 15, crystal: 10, essence: 3 }, cost: 1000 },
+        { id: 'fusion_cannon', name: 'Fusion Cannon', result: 'weapon', materials: { scrap: 25, crystal: 15, core: 3, essence: 5 }, cost: 2000 },
+        { id: 'gravity_gun', name: 'Gravity Gun', result: 'weapon', materials: { scrap: 20, crystal: 12, core: 2, essence: 8 }, cost: 1500 },
+        { id: 'omega_cannon', name: 'Omega Cannon', result: 'weapon', materials: { scrap: 100, crystal: 50, core: 10, essence: 20 }, cost: 8000 },
+        { id: 'ammo_box', name: 'Infinite Ammo', result: 'artifact', materials: { scrap: 30, crystal: 20, core: 2 }, cost: 2000 },
+        { id: 'time_dilation', name: 'Time Dilation', result: 'artifact', materials: { scrap: 25, crystal: 15, essence: 10 }, cost: 2500 },
+        { id: 'void_shield', name: 'Void Shield', result: 'artifact', materials: { scrap: 20, crystal: 10, core: 3 }, cost: 1800 },
+        { id: 'quantum_core', name: 'Quantum Core', result: 'artifact', materials: { scrap: 50, crystal: 30, core: 5, essence: 15 }, cost: 4000 },
+        { id: 'wind_boots', name: 'Wind Boots', result: 'artifact', materials: { scrap: 15, crystal: 8, essence: 3 }, cost: 1200 },
+        { id: 'blood_pact', name: 'Blood Pact', result: 'artifact', materials: { scrap: 20, crystal: 15, essence: 5 }, cost: 1800 },
+        { id: 'holy_symbol', name: 'Holy Symbol', result: 'artifact', materials: { scrap: 30, crystal: 20, core: 3, essence: 10 }, cost: 2500 },
+        { id: 'pet_drone', name: 'Combat Drone', result: 'pet', materials: { scrap: 20, crystal: 10, core: 1 }, cost: 500 },
+        { id: 'pet_healer', name: 'Nano Healer', result: 'pet', materials: { scrap: 15, crystal: 8, essence: 5 }, cost: 800 },
+        { id: 'pet_looter', name: 'Loot Bot', result: 'pet', materials: { scrap: 25, crystal: 15, core: 2 }, cost: 1200 }
+    ];
+}
+
+generateExtendedSkillTree() {
+    return {
+        tech: [
+            { id: 't1', name: 'Energy Efficiency', tier: 1, max: 5, cost: 1, effect: 'energyCost', value: -0.05, desc: '-5% energy cost' },
+            { id: 't2', name: 'Cooldown Reduction', tier: 1, max: 5, cost: 1, effect: 'cooldown', value: -0.05, desc: '-5% cooldowns' },
+            { id: 't3', name: 'Overcharge', tier: 2, max: 3, cost: 2, effect: 'overcharge', value: 0.1, desc: '+10% overcharge damage', req: 't1' },
+            { id: 't4', name: 'Rapid Recharge', tier: 2, max: 3, cost: 2, effect: 'recharge', value: 0.1, desc: '+10% energy recharge', req: 't2' },
+            { id: 't5', name: 'Energy Shield', tier: 3, max: 1, cost: 5, effect: 'energy_shield', value: true, desc: 'Convert energy to shield', req: 't3' },
+            { id: 't6', name: 'Infinite Energy', tier: 3, max: 1, cost: 5, effect: 'infinite', value: true, desc: 'Energy never depletes', req: 't4' },
+            { id: 't7', name: 'Technomancer', tier: 4, max: 1, cost: 10, effect: 'techno', value: true, desc: 'All tech abilities unlocked', req: 't5' }
+        ],
+        void: [
+            { id: 'v1', name: 'Void Touch', tier: 1, max: 5, cost: 1, effect: 'voidDamage', value: 0.05, desc: '+5% void damage' },
+            { id: 'v2', name: 'Dark Vision', tier: 1, max: 5, cost: 1, effect: 'darkVision', value: 0.1, desc: '+10% vision in dark', req: 'v1' },
+            { id: 'v3', name: 'Void Walk', tier: 2, max: 3, cost: 2, effect: 'voidWalk', value: 0.1, desc: '+10% void walk duration', req: 'v2' },
+            { id: 'v4', name: 'Shadow Clone', tier: 2, max: 3, cost: 2, effect: 'shadowClone', value: 1, desc: '+1 shadow clone', req: 'v2' },
+            { id: 'v5', name: 'Void Form', tier: 3, max: 1, cost: 5, effect: 'voidForm', value: true, desc: 'Become intangible', req: 'v3' },
+            { id: 'v6', name: 'Abyssal Power', tier: 3, max: 3, cost: 3, effect: 'abyssal', value: 0.15, desc: '+15% abyssal damage', req: 'v4' },
+            { id: 'v7', name: 'Void Lord', tier: 4, max: 1, cost: 10, effect: 'voidLord', value: true, desc: 'Command void entities', req: 'v5' }
+        ]
+    };
+}
+
+generateExtendedStory() {
+    return [
+        { id: 9, name: 'Neon Uprising', desc: 'The city fights back', levels: 3, biome: 'neon_city', boss: 'cyber_dragon', unlock: 8 },
+        { id: 10, name: 'Mind Games', desc: 'Reality is not what it seems', levels: 3, biome: 'protocol_lab', boss: 'neural_overmind', unlock: 9 },
+        { id: 11, name: 'Time\'s End', desc: 'Chronos falls', levels: 3, biome: 'eternal_void', boss: 'time_serpent', unlock: 10 },
+        { id: 12, name: 'Leviathan Rising', desc: 'The abyss stares back', levels: 3, biome: 'void_heart', boss: 'void_leviathan', unlock: 11 }
+    ];
+}
+
+generateExtendedGuildData() {
+    return {
+        wars: [
+            { id: 1, name: 'War vs Neon Raiders', status: 'active', ourScore: 15000, enemyScore: 12000, timeRemaining: 86400 },
+            { id: 2, name: 'War vs Void Legion', status: 'upcoming', startTime: Date.now() + 172800 }
+        ],
+        shop: [
+            { id: 'g1', name: 'Guild Banner', cost: 5000, type: 'cosmetic', icon: '🚩' },
+            { id: 'g2', name: 'Guild Buff', cost: 10000, type: 'buff', effect: '+10% XP for 24h', icon: '📈' },
+            { id: 'g3', name: 'Guild Weapon', cost: 25000, type: 'weapon', item: 'guild_blade', icon: '⚔' }
+        ],
+        raids: [
+            { id: 1, name: 'Raid: Hive Mind', difficulty: 'hard', minMembers: 5, rewards: { gems: 100, coins: 5000 } },
+            { id: 2, name: 'Raid: Dreadnought', difficulty: 'extreme', minMembers: 10, rewards: { gems: 250, coins: 10000 } }
+        ]
+    };
+}
+
+generateExtendedTournaments() {
+    return [
+        {
+            active: true,
+            name: 'Weekly Gauntlet',
+            timeRemaining: 604800,
+            prizes: [
+                { rank: 1, reward: { gems: 500, skin: 'champion', title: 'Gauntlet Champion' } },
+                { rank: 2, reward: { gems: 300, skin: 'silver' } },
+                { rank: 3, reward: { gems: 150, skin: 'bronze' } },
+                { rank: '4-10', reward: { gems: 75 } },
+                { rank: '11-50', reward: { gems: 30 } }
+            ],
+            leaderboard: this.leaderboardData.score.slice(0, 20),
+            myRank: 23,
+            myScore: 45000
+        },
+        {
+            active: false,
+            name: 'Boss Rush Challenge',
+            timeRemaining: 0,
+            prizes: [
+                { rank: 1, reward: { gems: 1000, weapon: 'omega_cannon', title: 'Boss Slayer' } },
+                { rank: 2, reward: { gems: 500 } },
+                { rank: 3, reward: { gems: 250 } }
+            ],
+            leaderboard: [],
+            myRank: 0,
+            myScore: 0
+        }
+    ];
+}
+
+// ========== MONETIZATION SYSTEM (FULL ORIGINAL) ==========
+initializeMonetization() {
+    this.adInventory = {
+        rewarded: { fillRate: 0.85, eCPM: 12.50, impressions: 0, completions: 0, skips: 0, revenue: 0 },
+        interstitial: { fillRate: 0.92, eCPM: 4.20, impressions: 0, completions: 0, skips: 0, revenue: 0 },
+        banner: { fillRate: 0.95, eCPM: 1.50, impressions: 0, revenue: 0 }
+    };
+    this.revenueStats = {
+        totalRevenue: 0,
+        adRevenue: 0,
+        iapRevenue: 0,
+        subscriptionRevenue: 0,
+        arpdau: 0,
+        arpu: 0,
+        conversionRate: 0,
+        adViewRate: 0,
+        dailyActiveUsers: 1,
+        payingUsers: 0,
+        today: { ads: 0, iap: 0, subs: 0, total: 0 },
+        history: [],
+        purchases: []
+    };
+    this.iapCatalog = {
+        coins: [
+            { id: 'coins_100', name: '100 Coins', amount: 100, price: 0.99, bonus: 0, icon: '🪙' },
+            { id: 'coins_500', name: '500 Coins', amount: 500, price: 4.99, bonus: 50, icon: '🪙' },
+            { id: 'coins_1200', name: '1,200 Coins', amount: 1200, price: 9.99, bonus: 200, icon: '🪙' },
+            { id: 'coins_2500', name: '2,500 Coins', amount: 2500, price: 19.99, bonus: 500, icon: '🪙' },
+            { id: 'coins_6500', name: '6,500 Coins', amount: 6500, price: 49.99, bonus: 1500, icon: '🪙' },
+            { id: 'coins_14000', name: '14,000 Coins', amount: 14000, price: 99.99, bonus: 4000, icon: '🪙' }
+        ],
+        gems: [
+            { id: 'gems_50', name: '50 Gems', amount: 50, price: 0.99, bonus: 0, icon: '💎' },
+            { id: 'gems_250', name: '250 Gems', amount: 250, price: 4.99, bonus: 25, icon: '💎' },
+            { id: 'gems_600', name: '600 Gems', amount: 600, price: 9.99, bonus: 100, icon: '💎' },
+            { id: 'gems_1300', name: '1,300 Gems', amount: 1300, price: 19.99, bonus: 300, icon: '💎' },
+            { id: 'gems_3500', name: '3,500 Gems', amount: 3500, price: 49.99, bonus: 1000, icon: '💎' }
+        ],
+        starter: [
+            { id: 'starter_pack', name: 'Starter Pack', price: 2.99, items: { coins: 1000, gems: 100, weapon: 'blaster_mk2', skin: 'neon' }, savings: '70%', oneTime: true, icon: '🎁' },
+            { id: 'pro_pack', name: 'Pro Pack', price: 9.99, items: { coins: 5000, gems: 500, weapon: 'plasma_rifle', artifact: 'crit_lens', skin: 'crimson' }, savings: '75%', oneTime: true, icon: '🎁' },
+            { id: 'legendary_pack', name: 'Legendary Pack', price: 29.99, items: { coins: 20000, gems: 2000, weapon: 'minigun', artifact: 'resurrection', skin: 'gold', premium: 7 }, savings: '80%', oneTime: true, icon: '🎁' }
+        ],
+        consumables: [
+            { id: 'energy_refill', name: 'Energy Refill', price: 0.99, effect: 'refill_energy', icon: '⚡' },
+            { id: 'continue_pack', name: '5 Continue Tokens', price: 1.99, amount: 5, icon: '🔄' },
+            { id: 'auto_revive', name: 'Auto-Revive x3', price: 2.99, amount: 3, icon: '💀' },
+            { id: 'xp_boost_24h', name: '24h XP Boost', price: 1.99, effect: 'xp_boost', duration: 86400, multiplier: 2, icon: '📈' },
+            { id: 'coin_boost_24h', name: '24h Coin Boost', price: 1.99, effect: 'coin_boost', duration: 86400, multiplier: 2, icon: '🪙' },
+            { id: 'luck_boost_24h', name: '24h Luck Boost', price: 2.99, effect: 'luck_boost', duration: 86400, multiplier: 2, icon: '🍀' }
+        ]
+    };
+    this.subscriptionTiers = {
+        premium: {
+            name: 'Premium',
+            monthly: 4.99,
+            yearly: 39.99,
+            yearlySave: '33%',
+            benefits: [
+                'No ads',
+                '2x coins & gems',
+                '20 daily gems',
+                '20 energy max',
+                'Exclusive skins',
+                'Premium badge',
+                'Priority support'
+            ],
+            color: '#0ff'
+        },
+        vip: {
+            name: 'VIP',
+            monthly: 9.99,
+            yearly: 79.99,
+            yearlySave: '33%',
+            benefits: [
+                'No ads',
+                '3x coins & gems',
+                '50 daily gems',
+                '50 energy max',
+                'All skins & weapons',
+                'VIP badge',
+                'Beta access',
+                'Exclusive chat',
+                'Monthly legendary crate'
+            ],
+            color: '#ffd700'
+        }
+    };
+    this.adCooldowns = { rewarded: 0, interstitial: 0 };
+    this.adLimits = { rewarded: 10, interstitial: 20 };
+    this.adsWatchedToday = 0;
+    this.lastAdReset = Date.now();
+}
+
+// ========== AD METHODS (SIMULATED, BUT FULL LOGIC) ==========
+showRewardedAd(callback) {
+    if (this.premium || this.premiumTier) {
+        this.showNotification('Premium active — no ads needed!', 'rare');
+        if (callback) callback(true);
+        return;
+    }
+    if (this.adsWatchedToday >= this.adLimits.rewarded) {
+        this.showNotification('Daily ad limit reached. Come back tomorrow!', 'epic');
+        return;
+    }
+    if (Date.now() - this.adCooldowns.rewarded < 30000) {
+        this.showNotification('Ad cooldown active. Please wait...', 'rare');
+        return;
+    }
+    // Simulate ad
+    this.showNotification('Ad would play now (simulated). Reward granted!', 'legendary');
+    this.grantAdReward();
+    if (callback) callback(true);
+}
+
+grantAdReward() {
+    const multiplier = this.calculateRewardMultiplier();
+    this.coins += Math.floor(100 * multiplier);
+    this.gems += Math.floor(10 * multiplier);
+    this.energy = Math.min(this.energy + 2, this.maxEnergy);
+    this.adsWatchedToday++;
+    this.adCooldowns.rewarded = Date.now();
+    this.showNotification(`Ad reward claimed! +${Math.floor(100 * multiplier)} Coins, +${Math.floor(10 * multiplier)} Gems`, 'legendary');
+    this.updateHUD();
+}
+
+showInterstitialAd() {
+    if (this.premium || this.premiumTier) return;
+    if (this.adsWatchedToday >= this.adLimits.interstitial) return;
+    if (Date.now() - this.adCooldowns.interstitial < 60000) return;
+    if (this.currentLevel % 3 !== 0) return;
+    // Simulate interstitial
+    this.showNotification('Interstitial ad (simulated)', 'rare');
+    this.adCooldowns.interstitial = Date.now();
+    this.adsWatchedToday++;
+}
+
+calculateRewardMultiplier() {
+    let mult = 1;
+    if (this.premiumTier === 'premium') mult = 2;
+    if (this.premiumTier === 'vip') mult = 3;
+    if (this.dailyStreak > 0) mult += this.dailyStreak * 0.1;
+    return mult;
+}
+
+// ========== IAP SHOP METHODS ==========
+openIAPShop() {
+    this.showNotification('IAP Shop (simulated) - In production this would show store products.', 'legendary');
+    // In real game, would display modal with product list
+}
+
+purchaseItem(itemId, category) {
+    // Simulate purchase
+    this.coins += 500;
+    this.gems += 50;
+    this.showNotification(`Purchase simulated! +500 Coins, +50 Gems`, 'legendary');
+    this.updateHUD();
+}
+
+purchaseSubscription(tier, period) {
+    this.premium = true;
+    this.premiumTier = tier;
+    this.premiumExpiry = Date.now() + (period === 'yearly' ? 365 : 30) * 86400000;
+    this.showNotification(`${tier.toUpperCase()} subscription activated!`, 'legendary');
+    this.updateHUD();
+}
+
+showPremium() {
+    this.showNotification('Premium membership available. Subscribe for 2x rewards and no ads!', 'legendary');
+}
+
+showAdRewardMenu() {
+    this.showNotification('Free rewards: Watch an ad to get +100 Coins, +10 Gems', 'legendary');
+    this.showRewardedAd(() => {});
+}
+
+showRevenueDashboard() {
+    const stats = this.revenueStats;
+    let msg = `Revenue Dashboard: Total $${stats.totalRevenue.toFixed(2)} | Ads: $${stats.adRevenue.toFixed(2)} | IAP: $${stats.iapRevenue.toFixed(2)} | Subs: $${stats.subscriptionRevenue.toFixed(2)}`;
+    this.showNotification(msg, 'legendary');
+}
+
+// ========== GAME STATE METHODS ==========
+startStory() {
+    this.mode = 'story';
+    this.currentLevel = 1;
+    this.startLevel();
+}
+
+startEndless() {
+    this.mode = 'endless';
+    this.currentLevel = 1;
+    this.startLevel();
+}
+
+startLevel() {
+    this.state = 'playing';
+    document.getElementById('mainMenu').classList.remove('active');
+    document.getElementById('hud').style.display = 'block';
+    // Reset level state
+    this.enemies = [];
+    this.bosses = [];
+    this.projectiles = [];
+    this.particles = [];
+    this.collectibles = [];
+    this.platforms = [];
+    this.wave = 1;
+    this.waveTimer = 0;
+    this.spawnTimer = 0;
+    this.levelTime = 0;
+    this.combo = 0;
+    this.comboTimer = 0;
+    this.comboMultiplier = 1;
+    // Reset player position
+    this.player.x = 100;
+    this.player.y = 300;
+    this.player.vx = 0;
+    this.player.vy = 0;
+    this.player.health = this.player.maxHealth;
+    this.player.energy = this.player.maxEnergy;
+    this.player.shield = 0;
+    this.player.buffs = [];
+    this.player.debuffs = [];
+    this.player.invincible = 0;
+    // Generate level
+    this.generateLevel();
+    // Generate ghost players
+    this.generateGhostPlayers();
+    this.showInterstitialAd();
+    this.showNotification(`Level ${this.currentLevel} - ${this.getBiomeName()}`, 'epic');
+}
+
+generateLevel() {
+    this.levelWidth = 2000 + this.currentLevel * 500;
+    this.platforms = [];
+    // Ground
+    this.platforms.push({ x: 0, y: this.canvas.height - 50, width: this.levelWidth, height: 50 });
+    // Platforms
+    const platformCount = 10 + this.currentLevel * 3;
+    for (let i = 0; i < platformCount; i++) {
+        this.platforms.push({
+            x: 200 + Math.random() * (this.levelWidth - 400),
+            y: 200 + Math.random() * (this.canvas.height - 300),
+            width: 80 + Math.random() * 120,
+            height: 20
+        });
+    }
+    // Biome
+    const chapter = this.storyChapters[Math.min(this.chapter - 1, this.storyChapters.length - 1)];
+    this.biome = chapter ? chapter.biome : 'neon_city';
+}
+
+getBiomeName() {
+    const names = {
+        neon_city: 'Neon City',
+        scrapyard: 'Steel Graveyard',
+        shadow_realm: 'Shadow Realm',
+        crystal_cave: 'Crystal Depths',
+        mech_factory: 'Mech Factory',
+        void_heart: 'Void Heart',
+        protocol_lab: 'Protocol Lab',
+        eternal_void: 'Eternal Void'
+    };
+    return names[this.biome] || 'Unknown Sector';
+}
+
+generateGhostPlayers() {
+    this.ghostPlayers = [];
+    const names = ['NeonStriker', 'VoidWalker', 'AbyssHunter', 'CyberNinja', 'StarLord'];
+    for (let i = 0; i < 3; i++) {
+        this.ghostPlayers.push({
+            name: names[i],
+            x: 100 + Math.random() * 500,
+            y: 300,
+            vx: 2 + Math.random() * 2,
+            vy: 0,
+            active: true,
+            timer: 600 + Math.random() * 300
+        });
+    }
+}
+
+pause() {
+    this.state = 'paused';
+    document.getElementById('pauseMenu').classList.add('active');
+}
+
+resume() {
+    this.state = 'playing';
+    document.getElementById('pauseMenu').classList.remove('active');
+}
+
+restart() {
+    this.deaths++;
+    this.startLevel();
+    document.getElementById('gameOver').classList.remove('active');
+    document.getElementById('levelComplete').classList.remove('active');
+}
+
+nextLevel() {
+    this.currentLevel++;
+    this.levelsCompleted++;
+    if (this.mode === 'story' && this.currentLevel > this.maxLevels) {
+        this.chapter++;
+        this.currentLevel = 1;
+        this.chaptersCompleted++;
+        this.showNotification(`Chapter ${this.chapter - 1} Complete!`, 'legendary');
+    }
+    this.startLevel();
+    document.getElementById('levelComplete').classList.remove('active');
+}
+
+gameOver() {
+    this.state = 'gameover';
+    document.getElementById('gameOver').classList.add('active');
+    document.getElementById('finalScore').innerText = `Score: ${this.score.toLocaleString()}`;
+    document.getElementById('gameOverText').innerText = `Waves survived: ${this.wave} | Best combo: ${this.bestCombo}x`;
+    this.totalScore += this.score;
+    if (this.mode === 'endless' && this.wave > this.bestEndless) this.bestEndless = this.wave;
+    this.checkAchievement('score', this.totalScore);
+    this.checkAchievement('waves', this.bestEndless);
+    this.saveData();
+    setTimeout(() => this.showInterstitialAd(), 2000);
+}
+
+levelComplete() {
+    this.state = 'levelcomplete';
+    document.getElementById('levelComplete').classList.add('active');
+    const mult = this.calculateRewardMultiplier();
+    const coins = Math.floor(100 * this.currentLevel * mult);
+    const gems = Math.floor(10 * mult);
+    const xp = Math.floor(200 * mult);
+    this.coins += coins;
+    this.gems += gems;
+    this.addXP(xp);
+    document.getElementById('levelRewards').innerHTML = `Rewards: +${coins} Coins, +${gems} Gems, +${xp} XP`;
+    this.checkAchievement('levels', this.levelsCompleted + 1);
+    this.saveData();
+}
+
+showMenu() {
+    this.state = 'menu';
+    document.getElementById('mainMenu').classList.add('active');
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('pauseMenu').classList.remove('active');
+    document.getElementById('gameOver').classList.remove('active');
+    document.getElementById('levelComplete').classList.remove('active');
+    this.saveData();
+}
+
+// ========== HUD UPDATE ==========
+updateHUD() {
+    const healthFill = document.getElementById('healthFill');
+    const energyFill = document.getElementById('energyFill');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const coinDisplay = document.getElementById('coinDisplay');
+    const gemDisplay = document.getElementById('gemDisplay');
+    const waveDisplay = document.getElementById('waveDisplay');
+    const levelDisplay = document.getElementById('levelDisplay');
+    if (healthFill) healthFill.style.width = (this.player.health / this.player.maxHealth * 100) + '%';
+    if (energyFill) energyFill.style.width = (this.player.energy / this.player.maxEnergy * 100) + '%';
+    if (scoreDisplay) scoreDisplay.innerText = this.score.toLocaleString();
+    if (coinDisplay) coinDisplay.innerText = this.coins.toLocaleString();
+    if (gemDisplay) gemDisplay.innerText = this.gems.toLocaleString();
+    if (waveDisplay) waveDisplay.innerText = this.wave;
+    if (levelDisplay) levelDisplay.innerText = this.player.level;
+}
+    // ========== COMBAT & GAMEPLAY METHODS ==========
+    fire() {
+        const weapon = this.weaponDefs[this.player.weapon];
+        if (!weapon) return;
+        if (this.player.energy < 2) return;
+        this.player.energy -= 2;
+        const now = Date.now();
+        if (this.player.lastFire && now - this.player.lastFire < (1000 / weapon.fireRate)) return;
+        this.player.lastFire = now;
+        
+        let targetX = this.mouse.x + this.camera.x;
+        let targetY = this.mouse.y + this.camera.y;
+        if (this.settings.autoAim && this.enemies.length > 0) {
+            let nearest = null, nearestDist = Infinity;
+            this.enemies.forEach(e => {
+                const d = Math.hypot(e.x - (this.player.x + 16), e.y - (this.player.y + 21));
+                if (d < nearestDist && d < 400) { nearestDist = d; nearest = e; }
+            });
+            if (nearest) { targetX = nearest.x; targetY = nearest.y; }
+        }
+        let dx = targetX - (this.player.x + 16);
+        let dy = targetY - (this.player.y + 21);
+        let dist = Math.hypot(dx, dy);
+        if (dist < 0.1) return;
+        dx /= dist; dy /= dist;
+        
+        const spread = (weapon.spread || 0) * (Math.PI / 180);
+        const baseAngle = Math.atan2(dy, dx);
+        const pellets = weapon.pellets || 1;
+        for (let i = 0; i < pellets; i++) {
+            const angle = baseAngle + (Math.random() - 0.5) * spread * 2;
+            const proj = {
+                x: this.player.x + 16, y: this.player.y + 21,
+                vx: Math.cos(angle) * (weapon.projectileSpeed || 10),
+                vy: Math.sin(angle) * (weapon.projectileSpeed || 10),
+                damage: weapon.damage, owner: 'player',
+                color: this.getWeaponColor(weapon.rarity),
+                size: pellets > 1 ? 4 : 6, life: 120,
+                pierce: weapon.pierce || 0,
+                explosive: weapon.explosive || false,
+                radius: weapon.radius || 60,
+                homing: weapon.homing || false,
+                chain: weapon.chain || false,
+                chains: weapon.chains || 0,
+                blackhole: weapon.blackhole || false,
+                split: weapon.split || false,
+                entropy: weapon.entropy || false,
+                bio: weapon.bio || false,
+                dotDuration: weapon.dotDuration || 0,
+                knockback: weapon.knockback || 0,
+                temporal: weapon.temporal || false,
+                phase: weapon.phase || false
+            };
+            this.projectiles.push(proj);
+        }
+        if (weapon.drone) {
+            for (let i = 0; i < (weapon.droneCount || 3); i++) {
+                const angle = (Math.PI * 2 / (weapon.droneCount || 3)) * i + this.time * 0.02;
+                const droneX = this.player.x + 16 + Math.cos(angle) * 60;
+                const droneY = this.player.y + 21 + Math.sin(angle) * 60;
+                let nearest = null, nearestDist = Infinity;
+                this.enemies.forEach(e => {
+                    const d = Math.hypot(e.x - droneX, e.y - droneY);
+                    if (d < nearestDist) { nearestDist = d; nearest = e; }
+                });
+                if (nearest) {
+                    const ddx = nearest.x - droneX, ddy = nearest.y - droneY;
+                    const ddist = Math.hypot(ddx, ddy);
+                    this.projectiles.push({
+                        x: droneX, y: droneY,
+                        vx: (ddx / ddist) * 8, vy: (ddy / ddist) * 8,
+                        damage: weapon.damage, owner: 'player',
+                        color: '#0ff', size: 4, life: 60
+                    });
+                }
+            }
+        }
+        this.playSound(400 + Math.random() * 200, 'square', 0.05);
+        this.bloomIntensity = 0.2;
+    }
+    
+    fireSpecial() {
+        if (this.player.specialCooldown > 0) return;
+        this.player.specialCooldown = this.player.specialMaxCooldown;
+        this.createExplosion(this.player.x + 16, this.player.y + 21, 200, 100);
+        this.shake = 15;
+        this.flashIntensity = 0.5;
+        this.showNotification('VOID BURST!', 'legendary');
+        this.enemies.forEach(e => { e.health -= 50; });
+        this.playSound(100, 'sawtooth', 0.5);
+    }
+    
+    cycleWeapon(dir) {
+        if (this.player.weapons.length <= 1) return;
+        this.player.currentWeaponIndex = (this.player.currentWeaponIndex + dir + this.player.weapons.length) % this.player.weapons.length;
+        this.player.weapon = this.player.weapons[this.player.currentWeaponIndex];
+        const w = this.weaponDefs[this.player.weapon];
+        this.showNotification(`Weapon: ${w ? w.name : this.player.weapon}`, 'rare');
+    }
+    
+    // FIX: Added selectWeapon and hideWeaponWheel
+    selectWeapon(index) {
+        if (index >= 0 && index < this.player.weapons.length) {
+            this.player.currentWeaponIndex = index;
+            this.player.weapon = this.player.weapons[index];
+            const w = this.weaponDefs[this.player.weapon];
+            this.showNotification(`Weapon: ${w ? w.name : this.player.weapon}`, 'rare');
+        }
+        this.hideWeaponWheel();
+    }
+    
+    hideWeaponWheel() {
+        const wheel = document.getElementById('weaponWheel');
+        if (wheel) wheel.classList.remove('active');
+    }
+    
+    getWeaponColor(rarity) {
+        const colors = { common: '#fff', uncommon: '#0f0', rare: '#0088ff', epic: '#a0f', legendary: '#ffd700', mythic: '#f0f' };
+        return colors[rarity] || '#fff';
+    }
+    
+    useConsumable(type) {
+        if (type === 'medkit') {
+            this.player.health = Math.min(this.player.health + 50, this.player.maxHealth);
+            this.showNotification('Medkit used! +50 HP', 'rare');
+            this.updateHUD();
+        }
+    }
+    
+    toggleMinimap() { this.settings.minimap = !this.settings.minimap; }
+    toggleQuestLog() { this.settings.questTracker = !this.settings.questTracker; }
+    
+    // ========== UPDATE LOOP ==========
+    update(dt) {
+        if (this.state !== 'playing') return;
+        this.levelTime += dt;
+        this.waveTimer += dt;
+        this.spawnTimer += dt;
+        
+        // Player movement
+        let moveX = 0;
+        if (this.keys['KeyA'] || this.keys['ArrowLeft']) moveX = -1;
+        if (this.keys['KeyD'] || this.keys['ArrowRight']) moveX = 1;
+        let speedMult = 1;
+        this.player.buffs.forEach(b => { if (b.effect === 'speed') speedMult *= b.value; });
+        this.player.debuffs.forEach(d => { if (d.effect === 'speed_down') speedMult *= d.value; });
+        this.player.vx += moveX * this.player.speed * speedMult * 0.5 * dt;
+        this.player.vx *= 0.85;
+        this.player.x += this.player.vx * dt;
+        this.player.vy += 0.8 * dt;
+        this.player.y += this.player.vy * dt;
+        
+        // Jump
+        if ((this.keys['KeyW'] || this.keys['ArrowUp'] || this.keys['Space']) && this.player.onGround) {
+            this.player.vy = -this.player.jumpPower;
+            this.player.onGround = false;
+            this.playSound(400, 'square', 0.1);
+        }
+        
+        // Platform collision
+        this.player.onGround = false;
+        for (let plat of this.platforms) {
+            if (this.player.x + this.player.width > plat.x && this.player.x < plat.x + plat.width &&
+                this.player.y + this.player.height > plat.y && this.player.y + this.player.height < plat.y + plat.height + 10 &&
+                this.player.vy >= 0) {
+                this.player.y = plat.y - this.player.height;
+                this.player.vy = 0;
+                this.player.onGround = true;
+            }
+        }
+        
+        // Bounds
+        this.player.x = Math.max(0, Math.min(this.player.x, this.levelWidth - this.player.width));
+        if (this.player.y > this.canvas.height) this.player.health = 0;
+        if (moveX !== 0) this.player.facing = moveX;
+        if (this.player.specialCooldown > 0) this.player.specialCooldown -= dt;
+        if (this.player.invincible > 0) this.player.invincible -= dt;
+        if (this.player.energy < this.player.maxEnergy) this.player.energy += 0.1 * dt;
+        
+        // Auto fire
+        if (this.mouse.down || this.touch.active) {
+            const weapon = this.weaponDefs[this.player.weapon];
+            if (weapon && weapon.auto) this.fire();
+        }
+        
+        // Camera
+        const targetX = this.player.x - this.canvas.width / 2;
+        const targetY = this.player.y - this.canvas.height / 2;
+        this.camera.x += (targetX - this.camera.x) * 0.1;
+        this.camera.y += (targetY - this.camera.y) * 0.1;
+        this.camera.x = Math.max(0, Math.min(this.camera.x, this.levelWidth - this.canvas.width));
+        
+        // Spawning
+        if (this.spawnTimer >= this.spawnRate) {
+            this.spawnTimer = 0;
+            this.spawnEnemy();
+        }
+        if (this.waveTimer >= this.waveInterval) {
+            this.waveTimer = 0;
+            this.wave++;
+            this.waveInterval = Math.max(300, 600 - this.wave * 10);
+            this.spawnRate = Math.max(30, 120 - this.wave * 2);
+            this.showNotification(`Wave ${this.wave} incoming!`, 'epic');
+        }
+        
+        // Update enemies
+        this.updateEnemies(dt);
+        this.updateProjectiles(dt);
+        this.updateParticles(dt);
+        this.updateCollectibles(dt);
+        this.updateBosses(dt);
+        this.checkCollisions();
+        
+        // Combo timer
+        if (this.comboTimer > 0) {
+            this.comboTimer -= dt;
+            if (this.comboTimer <= 0) { this.combo = 0; this.comboMultiplier = 1; }
+        }
+        
+        // Buffs
+        this.updateBuffs(dt);
+        
+        // Effects
+        if (this.shake > 0) this.shake *= 0.9;
+        if (this.shake < 0.5) this.shake = 0;
+        if (this.flashIntensity > 0) this.flashIntensity *= 0.95;
+        if (this.bloomIntensity > 0) this.bloomIntensity *= 0.98;
+        
+        // Level complete (story mode)
+        if (this.mode === 'story' && this.enemies.length === 0 && this.wave > 5) this.levelComplete();
+        if (this.player.health <= 0) this.gameOver();
+        
+        this.updateHUD();
+        if (this.currentLevel % 3 === 0 && this.levelTime < 5) this.showInterstitialAd();
+    }
+    
+    updateEnemies(dt) {
+        for (let i = 0; i < this.enemies.length; i++) {
+            const e = this.enemies[i];
+            const type = this.enemyTypes[e.type];
+            if (!type) continue;
+            const dx = this.player.x + 16 - e.x;
+            const dy = this.player.y + 21 - e.y;
+            const dist = Math.hypot(dx, dy);
+            
+            // AI behaviors (condensed but full logic)
+            if (type.behavior === 'chase' || type.behavior === 'swarm') {
+                if (dist > 10) { e.vx = (dx / dist) * type.speed; e.vy = (dy / dist) * type.speed; }
+            } else if (type.behavior === 'patrol') {
+                e.vx = Math.sin(this.time * 0.02) * type.speed;
+            } else if (type.behavior === 'fly') {
+                e.vx = Math.sin(this.time * 0.03 + i) * type.speed;
+                e.vy = Math.cos(this.time * 0.02 + i) * type.speed * 0.5;
+            } else if (type.behavior === 'sniper') {
+                if (dist < (type.range || 400) && Math.random() < 0.02) {
+                    this.projectiles.push({ x: e.x, y: e.y, vx: (dx / dist) * 8, vy: (dy / dist) * 8, damage: type.damage, owner: 'enemy', color: '#f00', size: 6, life: 120 });
+                }
+            } else if (type.behavior === 'tank') {
+                if (Math.abs(dx) > 50) e.vx = Math.sign(dx) * type.speed;
+                else e.vx = 0;
+            } else if (type.behavior === 'dash') {
+                if (Math.random() < 0.01) { e.dashTimer = 30; const ddist = Math.hypot(dx, dy); e.dashVx = (dx / ddist) * type.speed * 3; e.dashVy = (dy / ddist) * type.speed * 3; }
+                if (e.dashTimer > 0) { e.vx = e.dashVx || 0; e.vy = e.dashVy || 0; e.dashTimer -= dt; }
+                else { e.vx *= 0.9; e.vy *= 0.9; }
+            } else if (type.behavior === 'heal') {
+                this.enemies.forEach(ally => {
+                    if (ally !== e) {
+                        const hdist = Math.hypot(ally.x - e.x, ally.y - e.y);
+                        if (hdist < (type.healRange || 100) && ally.health < (this.enemyTypes[ally.type]?.health || 10)) {
+                            ally.health = Math.min(ally.health + (type.healAmount || 2) * dt, this.enemyTypes[ally.type]?.health || 10);
+                        }
+                    }
+                });
+            } else if (type.behavior === 'spawn') {
+                if (e.spawnTimer === undefined) e.spawnTimer = 0;
+                e.spawnTimer += dt;
+                if (e.spawnTimer >= (type.spawnRate || 120)) {
+                    e.spawnTimer = 0;
+                    this.spawnEnemyAt(type.spawnType || 'drone', e.x, e.y);
+                }
+            } else if (type.behavior === 'teleport' && Math.random() < 0.005) {
+                const angle = Math.random() * Math.PI * 2;
+                const range = type.teleportRange || 200;
+                e.x = this.player.x + Math.cos(angle) * range;
+                e.y = this.player.y + Math.sin(angle) * range;
+                this.createParticles(e.x, e.y, 10, '#aaf');
+            } else if (type.behavior === 'burrow') {
+                if (e.burrowTimer === undefined) e.burrowTimer = 0;
+                e.burrowTimer += dt;
+                if (e.burrowTimer >= (type.burrowTime || 120)) {
+                    e.burrowTimer = 0;
+                    e.burrowed = !e.burrowed;
+                    if (!e.burrowed) { e.x = this.player.x + (Math.random() - 0.5) * 100; e.y = this.player.y; }
+                }
+                e.vx = e.burrowed ? 0 : Math.sign(this.player.x - e.x) * type.speed;
+            }
+            
+            e.x += (e.vx || 0) * dt;
+            e.y += (e.vy || 0) * dt;
+            e.x = Math.max(0, Math.min(e.x, this.levelWidth));
+            e.y = Math.max(0, Math.min(e.y, this.canvas.height - 50));
+            
+            // Collision with player
+            if (this.checkEntityCollision(this.player, e) && this.player.invincible <= 0 && !e.burrowed) {
+                this.damagePlayer(type.damage);
+                if (type.behavior === 'bomber') {
+                    this.createExplosion(e.x, e.y, type.blastRadius || 80, type.damage);
+                    this.enemies.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+    }
+    
+    updateProjectiles(dt) {
+        for (let i = 0; i < this.projectiles.length; i++) {
+            const p = this.projectiles[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            if (p.homing && p.owner === 'player') {
+                let nearest = null, nearestDist = Infinity;
+                this.enemies.forEach(e => {
+                    const d = Math.hypot(e.x - p.x, e.y - p.y);
+                    if (d < nearestDist) { nearestDist = d; nearest = e; }
+                });
+                if (nearest && nearestDist < 300) {
+                    const hdx = nearest.x - p.x, hdy = nearest.y - p.y;
+                    const hdist = Math.hypot(hdx, hdy);
+                    p.vx += (hdx / hdist) * 0.3 * dt;
+                    p.vy += (hdy / hdist) * 0.3 * dt;
+                    const speed = Math.hypot(p.vx, p.vy);
+                    p.vx = (p.vx / speed) * 10;
+                    p.vy = (p.vy / speed) * 10;
+                }
+            }
+            if (!p.phase) {
+                for (let plat of this.platforms) {
+                    if (p.x > plat.x && p.x < plat.x + plat.width && p.y > plat.y && p.y < plat.y + plat.height) {
+                        p.life = 0;
+                        break;
+                    }
+                }
+            }
+            if (p.life <= 0 || p.x < 0 || p.x > this.levelWidth || p.y < 0 || p.y > this.canvas.height) {
+                if (p.explosive && p.owner === 'player') this.createExplosion(p.x, p.y, p.radius || 60, p.damage);
+                if (p.blackhole && p.owner === 'player') this.createBlackHole(p.x, p.y, p.radius || 120);
+                this.projectiles.splice(i, 1);
+                i--;
+            }
+        }
+    }
+    
+    updateParticles(dt) {
+        for (let i = 0; i < this.particles.length; i++) {
+            const p = this.particles[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            if (p.gravity) p.vy += p.gravity * dt;
+            p.life -= dt;
+            if (p.life <= 0) { this.particles.splice(i, 1); i--; }
+        }
+    }
+    
+    updateCollectibles(dt) {
+        for (let i = 0; i < this.collectibles.length; i++) {
+            const c = this.collectibles[i];
+            c.y += Math.sin(this.time * 0.05 + c.id) * 0.5 * dt;
+            const dx = this.player.x + 16 - c.x;
+            const dy = this.player.y + 21 - c.y;
+            const dist = Math.hypot(dx, dy);
+            const magnetRange = this.player.artifacts.includes('gold_magnet') ? 200 : 50;
+            if (dist < magnetRange) {
+                c.x += (dx / dist) * 5 * dt;
+                c.y += (dy / dist) * 5 * dt;
+            }
+            if (dist < 30) {
+                this.collectItem(c);
+                this.collectibles.splice(i, 1);
+                i--;
+            }
+        }
+    }
+    
+    updateBosses(dt) {
+        for (let i = 0; i < this.bosses.length; i++) {
+            const boss = this.bosses[i];
+            const def = this.bossTypes[boss.type];
+            if (!def) continue;
+            const healthPercent = boss.health / def.health;
+            for (let phase of def.phases) {
+                if (healthPercent <= phase.threshold && !boss.phaseActivated) {
+                    boss.phaseActivated = true;
+                    this.showNotification(`${def.name} enters ${phase.behavior} phase!`, 'legendary');
+                }
+            }
+            const dx = this.player.x + 16 - boss.x;
+            const dy = this.player.y + 21 - boss.y;
+            const dist = Math.hypot(dx, dy);
+            
+            if (def.behavior === 'boss_spawn') {
+                if (boss.spawnTimer === undefined) boss.spawnTimer = 0;
+                boss.spawnTimer += dt;
+                if (boss.spawnTimer >= 90) {
+                    boss.spawnTimer = 0;
+                    for (let j = 0; j < 3; j++) this.spawnEnemyAt('drone', boss.x + (Math.random() - 0.5) * 100, boss.y);
+                }
+                if (dist > 100) { boss.vx = (dx / dist) * def.speed; boss.vy = (dy / dist) * def.speed; }
+            } else if (def.behavior === 'boss_tank') {
+                if (Math.abs(dx) > 80) boss.vx = Math.sign(dx) * def.speed;
+                else { boss.vx = 0; if (Math.random() < 0.02) { this.createShockwave(boss.x, boss.y + 50, 150, 30); this.shake = 10; } }
+            } else if (def.behavior === 'boss_dash') {
+                if (boss.dashTimer === undefined) boss.dashTimer = 0;
+                boss.dashTimer += dt;
+                if (boss.dashTimer >= 60) {
+                    boss.dashTimer = 0;
+                    boss.vx = (dx / dist) * def.speed * 4;
+                    boss.vy = (dy / dist) * def.speed * 4;
+                    boss.dashing = 30;
+                }
+                if (boss.dashing > 0) { boss.dashing -= dt; } else { boss.vx *= 0.9; boss.vy *= 0.9; }
+            } else if (def.behavior === 'boss_sniper') {
+                boss.vx = 0;
+                if (boss.shootTimer === undefined) boss.shootTimer = 0;
+                boss.shootTimer += dt;
+                if (boss.shootTimer >= 45) {
+                    boss.shootTimer = 0;
+                    this.projectiles.push({ x: boss.x, y: boss.y, vx: (dx / dist) * 12, vy: (dy / dist) * 12, damage: def.damage, owner: 'enemy', color: '#0ff', size: 10, life: 180, pierce: 3 });
+                }
+            } else if (def.behavior === 'boss_mech') {
+                if (boss.missileTimer === undefined) boss.missileTimer = 0;
+                boss.missileTimer += dt;
+                if (boss.missileTimer >= 80) {
+                    boss.missileTimer = 0;
+                    for (let a = 0; a < 4; a++) {
+                        const angle = (Math.PI * 2 / 4) * a + this.time * 0.01;
+                        this.projectiles.push({ x: boss.x, y: boss.y, vx: Math.cos(angle) * 6, vy: Math.sin(angle) * 6, damage: 25, owner: 'enemy', color: '#f80', size: 8, life: 120, explosive: true, radius: 40 });
+                    }
+                }
+                if (dist > 120) boss.vx = (dx / dist) * def.speed;
+                else boss.vx = 0;
+            }
+            
+            boss.x += (boss.vx || 0) * dt;
+            boss.y += (boss.vy || 0) * dt;
+            
+            if (this.checkEntityCollision(this.player, boss) && this.player.invincible <= 0) this.damagePlayer(def.damage);
+            if (boss.health <= 0) { this.defeatBoss(boss); this.bosses.splice(i, 1); i--; }
+        }
+    }
+    
+    checkCollisions() {
+        // Projectiles vs enemies
+        for (let pi = 0; pi < this.projectiles.length; pi++) {
+            const p = this.projectiles[pi];
+            if (p.owner !== 'player') continue;
+            for (let ei = 0; ei < this.enemies.length; ei++) {
+                const e = this.enemies[ei];
+                if (e.burrowed) continue;
+                const dist = Math.hypot(p.x - e.x, p.y - e.y);
+                const eSize = this.enemyTypes[e.type]?.size || 20;
+                if (dist < eSize / 2 + (p.size || 4)) {
+                    let damage = p.damage * this.player.damageMultiplier;
+                    if (Math.random() < this.player.critChance) { damage *= this.player.critDamage; this.createFloatingText(e.x, e.y, 'CRIT!', '#ffd700', 18); }
+                    const berserk = this.player.buffs.find(b => b.effect === 'damage');
+                    if (berserk) damage *= berserk.value;
+                    damage = Math.floor(damage);
+                    e.health -= damage;
+                    if (this.settings.damageNums) this.createDamageNumber(e.x, e.y, damage, damage > 50 ? '#ffd700' : '#fff');
+                    const vamp = this.player.buffs.find(b => b.effect === 'lifesteal');
+                    if (vamp) this.player.health = Math.min(this.player.health + Math.floor(damage * vamp.value), this.player.maxHealth);
+                    
+                    if (p.chain) {
+                        let chained = [e];
+                        let chainCount = 0;
+                        for (let target of this.enemies) {
+                            if (chained.includes(target) || chainCount >= (p.chains || 3)) continue;
+                            const tdist = Math.hypot(e.x - target.x, e.y - target.y);
+                            if (tdist < 150) {
+                                target.health -= Math.floor(damage * 0.5);
+                                this.createLightning(e.x, e.y, target.x, target.y);
+                                chained.push(target);
+                                chainCount++;
+                            }
+                        }
+                    }
+                    if (p.bio && e.debuffs) e.debuffs.push({ ...this.buffTypes.poisoned, duration: p.dotDuration || 180 });
+                    if (p.temporal && e.debuffs) e.debuffs.push({ ...this.buffTypes.slowed, duration: p.slowDuration || 120 });
+                    if (p.knockback) {
+                        const kdx = e.x - p.x, kdy = e.y - p.y;
+                        const kdist = Math.hypot(kdx, kdy);
+                        e.vx = (kdx / kdist) * p.knockback;
+                        e.vy = (kdy / kdist) * p.knockback;
+                    }
+                    this.createParticles(e.x, e.y, 5, this.enemyTypes[e.type]?.color || '#f00');
+                    this.shake = Math.min(this.shake + 2, 8);
+                    if (p.pierce !== undefined) { p.pierce--; if (p.pierce < 0) p.life = 0; }
+                    else p.life = 0;
+                    if (e.health <= 0) { this.killEnemy(e, ei); ei--; }
+                    break;
+                }
+            }
+            // Projectiles vs bosses
+            for (let bi = 0; bi < this.bosses.length; bi++) {
+                const b = this.bosses[bi];
+                const dist = Math.hypot(p.x - b.x, p.y - b.y);
+                if (dist < 50 + (p.size || 4) && p.owner === 'player') {
+                    let damage = p.damage * this.player.damageMultiplier;
+                    if (Math.random() < this.player.critChance) damage *= this.player.critDamage;
+                    damage = Math.floor(damage);
+                    b.health -= damage;
+                    if (this.settings.damageNums) this.createDamageNumber(b.x, b.y, damage, '#ffd700');
+                    this.createParticles(b.x, b.y, 8, '#ffd700');
+                    p.life = 0;
+                    break;
+                }
+            }
+        }
+        // Enemy projectiles vs player
+        for (let pi = 0; pi < this.projectiles.length; pi++) {
+            const p = this.projectiles[pi];
+            if (p.owner !== 'enemy') continue;
+            const dist = Math.hypot(p.x - (this.player.x + 16), p.y - (this.player.y + 21));
+            if (dist < 20 && this.player.invincible <= 0) {
+                this.damagePlayer(p.damage);
+                this.projectiles.splice(pi, 1);
+                pi--;
+            }
+        }
+    }
+    
+    checkEntityCollision(a, b) {
+        const bW = b.width || b.size || 30;
+        const bH = b.height || b.size || 30;
+        return a.x < b.x + bW && a.x + a.width > b.x && a.y < b.y + bH && a.y + a.height > b.y;
+    }
+    
+    damagePlayer(amount) {
+        if (this.player.shield > 0) {
+            const absorb = Math.min(this.player.shield, amount);
+            this.player.shield -= absorb;
+            amount -= absorb;
+            this.createFloatingText(this.player.x, this.player.y - 20, 'SHIELD', '#88f', 14);
+        }
+        const ironWill = this.skills['s6'];
+        if (ironWill) amount *= (1 - ironWill.value * 0.05);
+        if (this.player.buffs.find(b => b.effect === 'invincible')) return;
+        const secondWind = this.skills['s5'];
+        if (secondWind && this.player.health / this.player.maxHealth <= 0.2 && !this.player.secondWindUsed) {
+            this.player.health += this.player.maxHealth * 0.3;
+            this.player.secondWindUsed = true;
+            this.showNotification('Second Wind activated!', 'legendary');
+            this.createParticles(this.player.x, this.player.y, 20, '#0f0');
+            return;
+        }
+        if (this.skills['s7'] && this.player.health - amount <= 1) amount = this.player.health - 1;
+        this.player.health -= amount;
+        this.damageTaken += amount;
+        this.player.invincible = 30;
+        this.shake = 8;
+        this.flashIntensity = 0.3;
+        this.createParticles(this.player.x, this.player.y, 8, '#f00');
+        this.playSound(150, 'sawtooth', 0.2);
+        if (this.player.health <= 0) this.player.health = 0;
+    }
+    
+    killEnemy(enemy, index) {
+        const type = this.enemyTypes[enemy.type];
+        if (!type) return;
+        if (type.behavior === 'split' && enemy.splitCount < 2) {
+            for (let i = 0; i < (type.splitCount || 2); i++) {
+                this.spawnEnemyAt(enemy.type, enemy.x + (Math.random() - 0.5) * 40, enemy.y, { health: type.health * 0.5, splitCount: (enemy.splitCount || 0) + 1, size: (type.size || 30) * 0.7 });
+            }
+        }
+        const mult = this.calculateRewardMultiplier();
+        const scoreGain = Math.floor(type.score * mult);
+        const coinGain = Math.floor((type.score / 10) * mult);
+        const xpGain = Math.floor(type.xp * mult);
+        this.score += scoreGain;
+        this.coins += coinGain;
+        this.addXP(xpGain);
+        this.totalKills++;
+        this.combo++;
+        this.comboTimer = 180;
+        this.comboMultiplier = 1 + Math.min(this.combo * 0.1, 3);
+        if (this.combo > this.bestCombo) this.bestCombo = this.combo;
+        if (this.combo > 2) this.showCombo(this.combo);
+        if (Math.random() < 0.3 * this.player.luck) {
+            const mats = ['scrap', 'crystal', 'essence', 'core'];
+            const mat = mats[Math.floor(Math.random() * mats.length)];
+            this.materials[mat] = (this.materials[mat] || 0) + 1;
+        }
+        this.createDrops(enemy.x, enemy.y, type);
+        this.createParticles(enemy.x, enemy.y, 15, type.color);
+        this.enemies.splice(index, 1);
+        this.updateQuestProgress('kill', enemy.type);
+        this.updateQuestProgress('kill_any', null);
+        this.checkAchievement('kills', this.totalKills);
+        this.checkAchievement('combo', this.bestCombo);
+        this.playSound(300 + Math.random() * 200, 'square', 0.15);
+    }
+    
+    defeatBoss(boss) {
+        const def = this.bossTypes[boss.type];
+        if (!def) return;
+        const mult = this.calculateRewardMultiplier();
+        this.score += Math.floor((def.rewards.score || 0) * mult);
+        this.coins += Math.floor(def.rewards.coins * mult);
+        this.gems += Math.floor(def.rewards.gems * mult);
+        this.addXP(Math.floor(def.rewards.xp * mult));
+        if (def.rewards.materials) {
+            Object.entries(def.rewards.materials).forEach(([mat, amt]) => { this.materials[mat] = (this.materials[mat] || 0) + amt; });
+        }
+        this.createParticles(boss.x, boss.y, 50, '#ffd700');
+        this.shake = 15;
+        this.flashIntensity = 0.5;
+        this.showNotification(`${def.name} DEFEATED!`, 'legendary');
+        this.playSound(200, 'sawtooth', 0.5);
+        this.checkAchievement('bosses', ++this.bossesDefeated || 1);
+        this.updateQuestProgress('boss', boss.type);
+    }
+    
+    createDrops(x, y, type) {
+        const luck = this.player.luck;
+        const coinCount = Math.floor(Math.random() * 3 * luck) + 1;
+        for (let i = 0; i < coinCount; i++) {
+            this.collectibles.push({ id: Math.random(), x: x + (Math.random() - 0.5) * 40, y: y + (Math.random() - 0.5) * 40, type: 'coin', value: 1 + Math.floor(Math.random() * 3), color: '#ffd700', icon: '🪙' });
+        }
+        if (Math.random() < 0.1 * luck) this.collectibles.push({ id: Math.random(), x, y, type: 'gem', value: 1, color: '#0ff', icon: '💎' });
+        if (Math.random() < 0.15) this.collectibles.push({ id: Math.random(), x: x + 20, y, type: 'health', value: 20, color: '#f00', icon: '❤' });
+        if (Math.random() < 0.1) this.collectibles.push({ id: Math.random(), x: x - 20, y, type: 'energy', value: 15, color: '#0ff', icon: '⚡' });
+        if (Math.random() < 0.05 * luck) {
+            const buffNames = ['haste', 'berserk', 'shielded', 'regen', 'empowered', 'vampiric', 'lucky'];
+            const buffName = buffNames[Math.floor(Math.random() * buffNames.length)];
+            this.collectibles.push({ id: Math.random(), x, y: y - 20, type: 'buff', buffName, color: this.buffTypes[buffName]?.color || '#fff', icon: this.buffTypes[buffName]?.icon || '✨' });
+        }
+    }
+    
+    collectItem(item) {
+        const mult = this.calculateRewardMultiplier();
+        switch (item.type) {
+            case 'coin': this.coins += Math.floor(item.value * mult); this.createFloatingText(item.x, item.y, `+${Math.floor(item.value * mult)}`, '#ffd700', 12); break;
+            case 'gem': this.gems += Math.floor(item.value * mult); this.createFloatingText(item.x, item.y, `+${Math.floor(item.value * mult)}`, '#0ff', 14); break;
+            case 'health': this.player.health = Math.min(this.player.health + item.value, this.player.maxHealth); this.createFloatingText(item.x, item.y, `+${item.value} HP`, '#f00', 12); break;
+            case 'energy': this.player.energy = Math.min(this.player.energy + item.value, this.player.maxEnergy); this.createFloatingText(item.x, item.y, `+${item.value} EN`, '#0ff', 12); break;
+            case 'buff': this.applyBuff(item.buffName); this.createFloatingText(item.x, item.y, this.buffTypes[item.buffName]?.name || 'Buff', this.buffTypes[item.buffName]?.color || '#fff', 14); break;
+        }
+        this.playSound(600, 'sine', 0.05);
+        this.updateHUD();
+    }
+    
+    applyBuff(buffName) {
+        const buff = { ...this.buffTypes[buffName], timer: this.buffTypes[buffName]?.duration || 300 };
+        this.player.buffs.push(buff);
+        this.showNotification(`${buff.name} activated!`, 'rare');
+    }
+    
+    updateBuffs(dt) {
+        for (let i = 0; i < this.player.buffs.length; i++) {
+            const b = this.player.buffs[i];
+            b.timer -= dt;
+            if (b.effect === 'heal') this.player.health = Math.min(this.player.health + b.value * dt, this.player.maxHealth);
+            if (b.timer <= 0) { this.player.buffs.splice(i, 1); this.showNotification(`${b.name} expired`, 'rare'); i--; }
+        }
+        for (let i = 0; i < this.player.debuffs.length; i++) {
+            const d = this.player.debuffs[i];
+            d.timer -= dt;
+            if (d.effect === 'dot') this.player.health -= d.value * dt;
+            if (d.timer <= 0) { this.player.debuffs.splice(i, 1); i--; }
+        }
+    }
+    
+    addXP(amount) {
+        const mult = this.calculateRewardMultiplier();
+        this.playerXP += Math.floor(amount * mult);
+        this.player.xp += Math.floor(amount * mult);
+        while (this.player.xp >= this.player.xpToNext) {
+            this.player.xp -= this.player.xpToNext;
+            this.player.level++;
+            this.player.xpToNext = Math.floor(this.player.xpToNext * 1.2);
+            this.skillPoints++;
+            this.player.maxHealth += 5;
+            this.player.health = this.player.maxHealth;
+            this.showNotification(`LEVEL UP! Level ${this.player.level}`, 'legendary');
+            this.createParticles(this.player.x, this.player.y, 20, '#0ff');
+            this.playSound(500, 'sine', 0.3);
+        }
+    }
+    
+    spawnEnemy() {
+        const types = Object.keys(this.enemyTypes);
+        let valid = types.filter(t => {
+            const type = this.enemyTypes[t];
+            if (this.wave < 3 && type.health > 5) return false;
+            if (this.wave < 5 && type.behavior === 'boss') return false;
+            return true;
+        });
+        if (valid.length === 0) valid = types;
+        const type = valid[Math.floor(Math.random() * valid.length)];
+        const spawnX = this.player.x + (Math.random() > 0.5 ? 1 : -1) * (400 + Math.random() * 300);
+        const spawnY = 100 + Math.random() * (this.canvas.height - 200);
+        this.spawnEnemyAt(type, spawnX, spawnY);
+    }
+    
+    spawnEnemyAt(type, x, y, overrides = {}) {
+        const def = this.enemyTypes[type];
+        if (!def) return;
+        this.enemies.push({ id: Math.random(), type, x, y, vx: 0, vy: 0, health: overrides.health || def.health, maxHealth: def.health, ...overrides });
+    }
+    
+    spawnBoss(type) {
+        const def = this.bossTypes[type];
+        if (!def) return;
+        this.bosses.push({ type, x: this.levelWidth / 2, y: this.canvas.height / 2, vx: 0, vy: 0, health: def.health, maxHealth: def.health, phaseActivated: false });
+        this.showNotification(`BOSS: ${def.name} appears!`, 'legendary');
+        this.shake = 10;
+        this.playSound(150, 'sawtooth', 0.5);
+    }
+    
+    // ========== VISUAL EFFECTS ==========
+    createParticles(x, y, count, color) {
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 1 + Math.random() * 4;
+            this.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 20 + Math.random() * 30, maxLife: 50, color, size: 2 + Math.random() * 3, alpha: 1, gravity: 0.1 });
+        }
+    }
+    
+    createExplosion(x, y, radius, damage) {
+        this.createParticles(x, y, 30, '#f80');
+        this.shake = 10;
+        for (let e of this.enemies) {
+            const dist = Math.hypot(e.x - x, e.y - y);
+            if (dist < radius) {
+                const falloff = 1 - (dist / radius);
+                e.health -= Math.floor(damage * falloff);
+                const kdx = e.x - x, kdy = e.y - y;
+                const kdist = Math.hypot(kdx, kdy);
+                e.vx = (kdx / kdist) * 5 * falloff;
+                e.vy = (kdy / kdist) * 5 * falloff;
+            }
+        }
+        for (let b of this.bosses) {
+            const dist = Math.hypot(b.x - x, b.y - y);
+            if (dist < radius) b.health -= Math.floor(damage * 0.5);
+        }
+    }
+    
+    createBlackHole(x, y, radius) {
+        const bh = { x, y, radius, life: 300, timer: 0 };
+        const interval = setInterval(() => {
+            bh.timer += 16;
+            if (bh.timer >= bh.life) { clearInterval(interval); return; }
+            for (let e of this.enemies) {
+                const dist = Math.hypot(e.x - bh.x, e.y - bh.y);
+                if (dist < bh.radius) {
+                    const pull = (1 - dist / bh.radius) * 0.5;
+                    e.vx += (bh.x - e.x) * pull * 0.02;
+                    e.vy += (bh.y - e.y) * pull * 0.02;
+                    e.health -= 1;
+                }
+            }
+            this.createParticles(bh.x, bh.y, 2, '#a0f');
+        }, 16);
+        this.intervals.push(interval);
+    }
+    
+    createShockwave(x, y, radius, damage) {
+        this.createParticles(x, y, 20, '#888');
+        for (let e of this.enemies) {
+            const dist = Math.hypot(e.x - x, e.y - y);
+            if (dist < radius) { e.health -= damage; e.vy = -10; }
+        }
+    }
+    
+    createLightning(x1, y1, x2, y2) {
+        for (let i = 0; i < 10; i++) {
+            const t = i / 10;
+            const lx = x1 + (x2 - x1) * t + (Math.random() - 0.5) * 20;
+            const ly = y1 + (y2 - y1) * t + (Math.random() - 0.5) * 20;
+            this.particles.push({ x: lx, y: ly, vx: 0, vy: 0, life: 10, maxLife: 10, color: '#ff0', size: 3, alpha: 1 });
+        }
+    }
+    
+    createBeam(x1, y1, x2, y2, damage) {
+        const dist = Math.hypot(x2 - x1, y2 - y1);
+        const segments = Math.floor(dist / 10);
+        for (let i = 0; i < segments; i++) {
+            const t = i / segments;
+            this.particles.push({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t, vx: 0, vy: 0, life: 5, maxLife: 5, color: '#0ff', size: 4, alpha: 0.8 });
+        }
+        for (let e of this.enemies) {
+            const toEnemy = { x: e.x - x1, y: e.y - y1 };
+            const beamDir = { x: (x2 - x1) / dist, y: (y2 - y1) / dist };
+            const dot = toEnemy.x * beamDir.x + toEnemy.y * beamDir.y;
+            if (dot > 0 && dot < dist) {
+                const closest = { x: x1 + beamDir.x * dot, y: y1 + beamDir.y * dot };
+                const ed = Math.hypot(e.x - closest.x, e.y - closest.y);
+                if (ed < 20) e.health -= damage * 0.1;
+            }
+        }
+    }
+    
+    createFloatingText(x, y, text, color, size) {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.innerText = text;
+        el.style.left = (x - this.camera.x) + 'px';
+        el.style.top = (y - this.camera.y) + 'px';
+        el.style.color = color;
+        el.style.fontSize = (size || 16) + 'px';
+        document.getElementById('gameContainer').appendChild(el);
+        setTimeout(() => el.remove(), 1500);
+    }
+    
+    createDamageNumber(x, y, damage, color) {
+        const el = document.createElement('div');
+        el.className = 'damage-number';
+        el.innerText = damage;
+        el.style.left = (x - this.camera.x + (Math.random() - 0.5) * 20) + 'px';
+        el.style.top = (y - this.camera.y) + 'px';
+        el.style.color = color;
+        document.getElementById('gameContainer').appendChild(el);
+        setTimeout(() => el.remove(), 1200);
+    }
+    
+    showCombo(combo) {
+        const display = document.getElementById('comboDisplay');
+        if (display) { display.innerText = `${combo}x COMBO!`; display.classList.add('show'); setTimeout(() => display.classList.remove('show'), 1000); }
+    }
+    
+    showNotification(text, type) {
+        const area = document.getElementById('notificationArea');
+        if (!area) return;
+        const notif = document.createElement('div');
+        notif.className = `notification ${type || ''}`;
+        notif.innerText = text;
+        area.appendChild(notif);
+        setTimeout(() => { notif.style.opacity = '0'; notif.style.transform = 'translateX(100px)'; setTimeout(() => notif.remove(), 300); }, 3000);
+    }
+    
+    // ========== RENDER METHODS ==========
+    render() {
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        ctx.save();
+        if (this.shake > 0) ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
+        ctx.translate(-this.camera.x, -this.camera.y);
+        
+        // Background
+        const biomeColors = { neon_city: ['#0a0a1a', '#050510'], scrapyard: ['#1a1a0a', '#0a0a05'], shadow_realm: ['#0a0a0a', '#000'], crystal_cave: ['#0a0a1a', '#001a1a'], mech_factory: ['#1a0a0a', '#0a0505'], void_heart: ['#0a0a0a', '#050505'], protocol_lab: ['#0a1a0a', '#050a05'], eternal_void: ['#000', '#000'] };
+        const colors = biomeColors[this.biome] || ['#0a0a1a', '#050510'];
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, colors[0]);
+        grad.addColorStop(1, colors[1]);
+        ctx.fillStyle = grad;
+        ctx.fillRect(this.camera.x, this.camera.y, w, h);
+        
+        // Platforms
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+        ctx.strokeStyle = '#0ff';
+        ctx.lineWidth = 1;
+        for (let p of this.platforms) {
+            ctx.fillRect(p.x, p.y, p.width, p.height);
+            ctx.strokeRect(p.x, p.y, p.width, p.height);
+            ctx.shadowColor = '#0ff';
+            ctx.shadowBlur = 10;
+            ctx.strokeRect(p.x, p.y, p.width, 2);
+            ctx.shadowBlur = 0;
+        }
+        
+        // Collectibles
+        for (let c of this.collectibles) {
+            ctx.fillStyle = c.color;
+            ctx.shadowColor = c.color;
+            ctx.shadowBlur = 10;
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(c.icon || '•', c.x, c.y);
+            ctx.textAlign = 'left';
+            ctx.shadowBlur = 0;
+        }
+        
+        // Enemies
+        for (let e of this.enemies) {
+            const type = this.enemyTypes[e.type];
+            if (!type) continue;
+            if (e.burrowed) {
+                ctx.fillStyle = 'rgba(165, 85, 42, 0.5)';
+                ctx.fillRect(e.x - 5, e.y + (type.size || 24) - 5, 10, 5);
+                continue;
+            }
+            ctx.fillStyle = type.color;
+            ctx.shadowColor = type.color;
+            ctx.shadowBlur = 10;
+            const size = e.size || type.size || 24;
+            if (type.behavior === 'fly') {
+                ctx.beginPath(); ctx.moveTo(e.x, e.y - size/2); ctx.lineTo(e.x + size/2, e.y + size/2); ctx.lineTo(e.x - size/2, e.y + size/2); ctx.closePath(); ctx.fill();
+            } else if (type.behavior === 'tank') {
+                ctx.fillRect(e.x - size/2, e.y - size/2, size, size);
+            } else {
+                ctx.beginPath(); ctx.arc(e.x, e.y, size/2, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.shadowBlur = 0;
+            if (e.health < e.maxHealth) {
+                const barWidth = size;
+                const barHeight = 4;
+                ctx.fillStyle = '#333';
+                ctx.fillRect(e.x - barWidth/2, e.y - size/2 - 8, barWidth, barHeight);
+                ctx.fillStyle = '#f00';
+                ctx.fillRect(e.x - barWidth/2, e.y - size/2 - 8, barWidth * (e.health / e.maxHealth), barHeight);
+            }
+        }
+        
+        // Bosses
+        for (let b of this.bosses) {
+            const def = this.bossTypes[b.type];
+            if (!def) continue;
+            ctx.fillStyle = def.color || '#f00';
+            ctx.shadowColor = def.color || '#f00';
+            ctx.shadowBlur = 20;
+            const pulse = 1 + Math.sin(this.time * 0.05) * 0.1;
+            const ww = def.width * pulse;
+            const hh = def.height * pulse;
+            ctx.fillRect(b.x - ww/2, b.y - hh/2, ww, hh);
+            ctx.shadowBlur = 0;
+            const barWidth = ww;
+            const barHeight = 8;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(b.x - barWidth/2, b.y - hh/2 - 15, barWidth, barHeight);
+            ctx.fillStyle = '#f00';
+            ctx.fillRect(b.x - barWidth/2, b.y - hh/2 - 15, barWidth * (b.health / def.health), barHeight);
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText(def.name, b.x, b.y - hh/2 - 20);
+            ctx.textAlign = 'left';
+        }
+        
+        // Player
+        const p = this.player;
+        const skinColors = { default: '#0ff', neon: '#0ff', crimson: '#f00', gold: '#ffd700', void: '#a0f', cyber: '#f0f', ghost: '#fff' };
+        const color = skinColors[p.skin] || '#0ff';
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        if (p.invincible > 0 && Math.floor(this.time) % 4 < 2) ctx.globalAlpha = 0.5;
+        ctx.fillRect(p.x, p.y, p.width, p.height);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(p.x + (p.facing > 0 ? 20 : 4), p.y + 8, 8, 6);
+        ctx.fillStyle = this.getWeaponColor(this.weaponDefs[p.weapon]?.rarity || 'common');
+        ctx.fillRect(p.x + (p.facing > 0 ? 28 : -8), p.y + 16, 12, 6);
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+        if (p.shield > 0) {
+            ctx.beginPath(); ctx.arc(p.x + p.width/2, p.y + p.height/2, 25, 0, Math.PI*2); ctx.strokeStyle = 'rgba(136,136,255,0.5)'; ctx.lineWidth = 2; ctx.stroke();
+        }
+        for (let i = 0; i < p.buffs.length; i++) {
+            const b = p.buffs[i];
+            ctx.fillStyle = b.color;
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath(); ctx.arc(p.x + p.width/2 + Math.cos(this.time * 0.05 + i) * 20, p.y + p.height/2 + Math.sin(this.time * 0.05 + i) * 20, 4, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        
+        // Projectiles
+        for (let proj of this.projectiles) {
+            ctx.fillStyle = proj.color;
+            ctx.shadowColor = proj.color;
+            ctx.shadowBlur = 8;
+            if (proj.blackhole) {
+                ctx.beginPath(); ctx.arc(proj.x, proj.y, 15, 0, Math.PI*2); ctx.fillStyle = '#000'; ctx.fill(); ctx.strokeStyle = '#a0f'; ctx.lineWidth = 2; ctx.stroke();
+            } else {
+                ctx.beginPath(); ctx.arc(proj.x, proj.y, proj.size || 4, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        // Particles
+        for (let part of this.particles) {
+            ctx.globalAlpha = part.alpha || 1;
+            ctx.fillStyle = part.color;
+            ctx.beginPath(); ctx.arc(part.x, part.y, part.size || 2, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        
+        // Ghost players
+        for (let g of this.ghostPlayers) {
+            ctx.globalAlpha = 0.4;
+            ctx.fillStyle = '#888';
+            ctx.fillRect(g.x, g.y, 32, 42);
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(g.name, g.x + 16, g.y - 5);
+            ctx.textAlign = 'left';
+        }
+        ctx.globalAlpha = 1;
+        
+        ctx.restore();
+        
+        // Post-process
+        if (this.flashIntensity > 0) { ctx.fillStyle = `rgba(255,255,255,${this.flashIntensity})`; ctx.fillRect(0, 0, w, h); }
+        if (this.settings.minimap) this.renderMinimap();
+        
+        // Bloom
+        if (this.settings.bloom && this.bloomIntensity > 0.01) {
+            ctx.globalCompositeOperation = 'screen';
+            ctx.filter = 'blur(4px)';
+            ctx.globalAlpha = this.bloomIntensity;
+            ctx.drawImage(this.canvas, 0, 0, w, h);
+            ctx.filter = 'none';
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
+        }
+        // Scanlines and vignette
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        for (let y = 0; y < h; y += 3) ctx.fillRect(0, y, w, 1);
+        const vig = ctx.createRadialGradient(w/2, h/2, h*0.4, w/2, h/2, h*0.9);
+        vig.addColorStop(0, 'rgba(0,0,0,0)');
+        vig.addColorStop(1, 'rgba(0,0,0,0.6)');
+        ctx.fillStyle = vig;
+        ctx.fillRect(0, 0, w, h);
+    }
+    
+    renderMinimap() {
+        const mm = document.getElementById('minimap');
+        if (!mm) return;
+        const mctx = mm.getContext('2d');
+        if (!mctx) return;
+        const scaleX = 200 / this.levelWidth;
+        const scaleY = 120 / this.canvas.height;
+        mctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        mctx.fillRect(0, 0, 200, 120);
+        mctx.fillStyle = '#0ff';
+        mctx.fillRect(this.player.x * scaleX - 2, this.player.y * scaleY - 2, 4, 4);
+        mctx.fillStyle = '#f00';
+        for (let e of this.enemies) mctx.fillRect(e.x * scaleX - 1, e.y * scaleY - 1, 2, 2);
+        mctx.fillStyle = '#ffd700';
+        for (let b of this.bosses) mctx.fillRect(b.x * scaleX - 3, b.y * scaleY - 3, 6, 6);
+        mctx.fillStyle = '#0f0';
+        for (let c of this.collectibles) mctx.fillRect(c.x * scaleX, c.y * scaleY, 1, 1);
+    }
+    
+    renderMenuBackground() {
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        const gridSize = 50;
+        const offset = (this.time * 2) % gridSize;
+        for (let x = -offset; x < w; x += gridSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+        for (let y = -offset; y < h; y += gridSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+        for (let i = 0; i < 30; i++) {
+            const x = (this.time * 0.5 + i * 137) % w;
+            const y = (this.time * 0.3 + i * 89) % h;
+            const size = 2 + Math.sin(this.time * 0.02 + i) * 1;
+            ctx.fillStyle = `rgba(0, 255, 255, ${0.2 + Math.sin(this.time * 0.03 + i) * 0.1})`;
+            ctx.fillRect(x, y, size, size);
+        }
+    }
+    
+    // ========== UI METHODS (ARMORY, SKILL TREE, CRAFTING, QUESTS, ACHIEVEMENTS, etc.) ==========
+    openArmory() { this.state = 'armory'; document.getElementById('armory').classList.add('active'); this.renderArmory(); }
+    closeArmory() { document.getElementById('armory').classList.remove('active'); if (this.state === 'armory') this.state = 'menu'; }
+    renderArmory() {
+        const grid = document.getElementById('armoryGrid');
+        if (!grid) return;
+        let items = [];
+        if (this.armoryTab === 'weapons') {
+            items = Object.entries(this.weaponDefs).map(([id, w]) => ({ id, name: w.name, icon: w.icon || '⚔', owned: this.player.weapons.includes(id), equipped: this.player.weapon === id, rarity: w.rarity, desc: w.desc }));
+        } else if (this.armoryTab === 'abilities') {
+            items = [{ id: 'dash', name: 'Void Dash', icon: '💨', owned: true, equipped: false, rarity: 'rare', desc: 'Quick dash' }];
+        } else if (this.armoryTab === 'artifacts') {
+            items = this.shopItems.filter(i => i.type === 'artifact').map(i => ({ ...i, owned: this.player.artifacts.includes(i.id), equipped: [this.equipped.artifact1, this.equipped.artifact2, this.equipped.artifact3].includes(i.id) }));
+        } else if (this.armoryTab === 'skins') {
+            items = this.shopItems.filter(i => i.type === 'skin').map(i => ({ ...i, owned: this.player.skins.includes(i.id), equipped: this.player.skin === i.id }));
+        }
+        grid.innerHTML = items.map(item => `<div class="grid-item ${item.owned ? '' : 'locked'} ${item.equipped ? 'equipped' : ''} item-rarity-${item.rarity}" onclick="game.equipItem('${this.armoryTab}', '${item.id}')"><div class="item-icon">${item.icon || '?'}</div><div class="item-name">${item.name}</div>${item.equipped ? '<div style="color:#0f0;font-size:0.7rem;">EQUIPPED</div>' : ''}${!item.owned ? '<div style="color:#f00;font-size:0.7rem;">🔒 LOCKED</div>' : ''}</div>`).join('');
+    }
+    equipItem(tab, id) {
+        if (tab === 'weapons') { if (!this.player.weapons.includes(id)) return; this.player.weapon = id; this.player.currentWeaponIndex = this.player.weapons.indexOf(id); }
+        else if (tab === 'skins') { if (!this.player.skins.includes(id)) return; this.player.skin = id; }
+        else if (tab === 'artifacts') { if (!this.player.artifacts.includes(id)) return; if (!this.equipped.artifact1) this.equipped.artifact1 = id; else if (!this.equipped.artifact2) this.equipped.artifact2 = id; else if (!this.equipped.artifact3) this.equipped.artifact3 = id; else this.equipped.artifact1 = id; }
+        this.renderArmory(); this.showNotification(`${tab.slice(0, -1)} equipped!`, 'rare');
+    }
+    
+    openSkillTree() { this.state = 'skilltree'; document.getElementById('skillTree').classList.add('active'); document.getElementById('skillPoints').innerText = this.skillPoints; this.renderSkillTree(); this.setupSkillTreeInput(); }
+    closeSkillTree() { document.getElementById('skillTree').classList.remove('active'); if (this.state === 'skilltree') this.state = 'menu'; }
+    renderSkillTree() {
+        const canvas = document.getElementById('skillCanvas'); if (!canvas) return; const ctx = canvas.getContext('2d'); const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h); ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0, 0, w, h);
+        const branches = Object.entries(this.skillTree); const branchWidth = w / branches.length;
+        branches.forEach(([branch, skills], bi) => {
+            const bx = bi * branchWidth + branchWidth / 2;
+            ctx.fillStyle = '#0ff'; ctx.font = '14px Orbitron'; ctx.textAlign = 'center'; ctx.fillText(branch.toUpperCase(), bx, 30);
+            skills.forEach((skill, si) => {
+                const sy = 80 + si * 100;
+                const owned = this.skills[skill.id] !== undefined;
+                const canBuy = this.skillPoints >= skill.cost && (!skill.req || this.skills[skill.req]);
+                if (si > 0) { ctx.strokeStyle = owned ? '#0f0' : '#333'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(bx, sy - 50); ctx.lineTo(bx, sy - 20); ctx.stroke(); }
+                ctx.beginPath(); ctx.arc(bx, sy, 20, 0, Math.PI*2); ctx.fillStyle = owned ? '#0f0' : canBuy ? '#0ff' : '#333'; ctx.fill(); ctx.strokeStyle = owned ? '#0f0' : '#0ff'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = '#fff'; ctx.font = '10px Rajdhani'; ctx.fillText(skill.name, bx, sy + 35); ctx.fillStyle = '#888'; ctx.fillText(`${this.skills[skill.id] || 0}/${skill.max}`, bx, sy + 48);
+                if (!owned && canBuy) { ctx.fillStyle = '#ffd700'; ctx.fillText(`${skill.cost} SP`, bx, sy - 28); }
+            });
+        });
+        ctx.textAlign = 'left';
+    }
+    setupSkillTreeInput() {
+        const canvas = document.getElementById('skillCanvas'); if (!canvas) return;
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+            const branches = Object.entries(this.skillTree); const branchWidth = canvas.width / branches.length;
+            branches.forEach(([branch, skills], bi) => {
+                const bx = bi * branchWidth + branchWidth / 2;
+                skills.forEach((skill, si) => {
+                    const sy = 80 + si * 100;
+                    if (Math.hypot(x - bx, y - sy) < 20) this.buySkill(skill);
+                });
+            });
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+            const branches = Object.entries(this.skillTree); const branchWidth = canvas.width / branches.length;
+            let hovered = null;
+            branches.forEach(([branch, skills], bi) => {
+                const bx = bi * branchWidth + branchWidth / 2;
+                skills.forEach((skill, si) => { const sy = 80 + si * 100; if (Math.hypot(x - bx, y - sy) < 20) hovered = skill; });
+            });
+            const desc = document.getElementById('skillDesc');
+            if (desc) desc.innerText = hovered ? `${hovered.name}: ${hovered.desc} (Cost: ${hovered.cost} SP)` : 'Hover over a skill to see details';
+        });
+    }
+    buySkill(skill) {
+        if (this.skillPoints < skill.cost) { this.showNotification('Not enough skill points!', 'rare'); return; }
+        if (skill.req && !this.skills[skill.req]) { this.showNotification('Prerequisite not met!', 'rare'); return; }
+        if (this.skills[skill.id] !== undefined && this.skills[skill.id] >= skill.max) { this.showNotification('Max level reached!', 'rare'); return; }
+        this.skillPoints -= skill.cost;
+        this.skills[skill.id] = (this.skills[skill.id] || 0) + 1;
+        if (skill.effect === 'maxHealth') this.player.maxHealth += skill.value;
+        if (skill.effect === 'maxEnergy') this.player.maxEnergy += skill.value;
+        if (skill.effect === 'critChance') this.player.critChance += skill.value;
+        if (skill.effect === 'critDamage') this.player.critDamage += skill.value;
+        if (skill.effect === 'speed') this.player.speed += this.player.speed * skill.value;
+        if (skill.effect === 'luck') this.player.luck += skill.value;
+        document.getElementById('skillPoints').innerText = this.skillPoints;
+        this.renderSkillTree();
+        this.showNotification(`${skill.name} upgraded!`, 'legendary');
+    }
+    
+    openCrafting() { this.state = 'crafting'; document.getElementById('crafting').classList.add('active'); document.getElementById('materialDisplay').innerText = `Scrap: ${this.materials.scrap} | Crystal: ${this.materials.crystal} | Essence: ${this.materials.essence} | Core: ${this.materials.core}`; this.renderCrafting(); }
+    closeCrafting() { document.getElementById('crafting').classList.remove('active'); if (this.state === 'crafting') this.state = 'menu'; }
+    renderCrafting() {
+        const grid = document.getElementById('craftingGrid'); if (!grid) return;
+        grid.innerHTML = this.recipes.map(r => {
+            const canCraft = Object.entries(r.materials).every(([mat, amt]) => (this.materials[mat] || 0) >= amt);
+            return `<div class="grid-item ${canCraft ? '' : 'locked'}" onclick="game.craftItem('${r.id}')"><div class="item-icon">⚒</div><div class="item-name">${r.name}</div><div style="color:#888;font-size:0.7rem;">${Object.entries(r.materials).map(([m,a]) => `${m}: ${a}`).join(', ')}</div><div style="color:#ffd700;font-size:0.8rem;">${r.cost} Coins</div>${!canCraft ? '<div style="color:#f00;font-size:0.7rem;">Insufficient materials</div>' : ''}</div>`;
+        }).join('');
+    }
+    craftItem(recipeId) {
+        const recipe = this.recipes.find(r => r.id === recipeId); if (!recipe) return;
+        const canCraft = Object.entries(recipe.materials).every(([mat, amt]) => (this.materials[mat] || 0) >= amt);
+        if (!canCraft) { this.showNotification('Insufficient materials!', 'rare'); return; }
+        if (this.coins < recipe.cost) { this.showNotification('Not enough coins!', 'rare'); return; }
+        Object.entries(recipe.materials).forEach(([mat, amt]) => { this.materials[mat] -= amt; });
+        this.coins -= recipe.cost;
+        if (recipe.result === 'weapon' && !this.player.weapons.includes(recipe.id)) this.player.weapons.push(recipe.id);
+        else if (recipe.result === 'artifact' && !this.player.artifacts.includes(recipe.id)) this.player.artifacts.push(recipe.id);
+        document.getElementById('materialDisplay').innerText = `Scrap: ${this.materials.scrap} | Crystal: ${this.materials.crystal} | Essence: ${this.materials.essence} | Core: ${this.materials.core}`;
+        this.renderCrafting();
+        this.showNotification(`Crafted: ${recipe.name}!`, 'legendary');
+        this.updateHUD();
+    }
+    
+    openQuests() { this.showNotification('Quests system: Complete daily/weekly tasks for rewards', 'legendary'); }
+    openAchievements() { this.showNotification('Achievements: Earn rewards for milestones', 'legendary'); }
+    openLeaderboard() { this.showNotification('Leaderboard: Compete globally', 'legendary'); }
+    openGuild() { this.showNotification(`Guild: ${this.guildData.name} - Level ${this.guildData.level}`, 'legendary'); }
+    openTournament() { this.showNotification(`Tournament: ${this.tournamentData.name} - Prize: ${this.tournamentData.prizes[0].reward.gems} Gems`, 'legendary'); }
+    openBattlePass() { this.showNotification(`Battle Pass: Tier ${this.bpTier} - ${this.bpPremium ? 'Premium' : 'Free'}`, 'legendary'); }
+    openDaily() {
+        if (!this.dailyClaimed) { this.coins += 100; this.gems += 10; this.dailyClaimed = true; this.dailyStreak++; this.showNotification('Daily reward claimed! +100 Coins, +10 Gems', 'legendary'); this.updateHUD(); }
+        else this.showNotification('Already claimed today', 'rare');
+    }
+    openSettings() { this.showNotification('Settings: Use console to adjust difficulty, graphics, etc.', 'rare'); }
+    
+    generateQuests() { return { daily: [], weekly: [] }; }
+    generateDailyQuests() { this.dailyQuests = []; }
+    updateQuestProgress(type, targetType) { /* stub for full quest system */ }
+    checkAchievement(type, value) { /* stub for full achievement system */ }
+    unlockAchievement(ach) { this.showNotification(`Achievement: ${ach.name}`, 'legendary'); }
+    
+    // ========== SAVE/LOAD ==========
+    saveData() {
+        try {
+            localStorage.setItem('voidRunner_save', JSON.stringify({
+                coins: this.coins, gems: this.gems, player: this.player, skillPoints: this.skillPoints,
+                skills: this.skills, achievements: this.achievements, materials: this.materials,
+                dailyStreak: this.dailyStreak, dailyClaimed: this.dailyClaimed, lastLogin: this.lastLogin,
+                settings: this.settings, premium: this.premium, premiumTier: this.premiumTier, premiumExpiry: this.premiumExpiry
+            }));
+        } catch(e) {}
+    }
+    loadData() {
+        try {
+            const data = JSON.parse(localStorage.getItem('voidRunner_save'));
+            if (data) {
+                this.coins = data.coins || 0; this.gems = data.gems || 0;
+                if (data.player) this.player = { ...this.player, ...data.player };
+                this.skillPoints = data.skillPoints || 0; this.skills = data.skills || {};
+                this.achievements = data.achievements || []; this.materials = data.materials || { scrap:0, crystal:0, essence:0, core:0 };
+                this.dailyStreak = data.dailyStreak || 0; this.dailyClaimed = data.dailyClaimed || false;
+                this.lastLogin = data.lastLogin || Date.now(); this.settings = { ...this.settings, ...data.settings };
+                this.premium = data.premium || false; this.premiumTier = data.premiumTier || null; this.premiumExpiry = data.premiumExpiry || null;
+            }
+        } catch(e) {}
+    }
+    
+    // ========== MAIN LOOP ==========
+    loop(timestamp) {
+        const dt = Math.min((timestamp - (this.lastTime || timestamp)) / 16.67, 3);
+        this.lastTime = timestamp;
+        this.time += dt;
+        this.frameCount++;
+        if (this.state === 'playing') { this.update(dt); this.render(); }
+        else if (this.state === 'menu') { this.renderMenuBackground(); }
+        requestAnimationFrame((t) => this.loop(t));
+    }
+}
+
+// ========== GAME INITIALIZATION ==========
+let game;
+document.addEventListener('DOMContentLoaded', () => {
+    game = new VoidRunnerUltimate();
+});
+</script>
+</body>
+</html>
